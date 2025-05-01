@@ -35,14 +35,14 @@ describe("Verify the Dashboard file contents of export & import", () => {
 
 describe("Compare Instance 1 and Instance 2 Chart Data", () => {
   it("Should compare the chart data between instance 1 and instance 2", () => {
-    const dataPath = Cypress.env("datapath");
+    const dashboardUi = Cypress.env("dashboardUi");
     const itemName = Cypress.env("dashboard");
 
     cy.log(`Comparing chart data for item: ${itemName}`);
-    cy.log(`Data path: ${dataPath}`);
+    cy.log(`Data path: ${dashboardUi}`);
 
     cy.task("verifyUiContents", {
-      dataPath,
+      dashboardUi,
       itemName,
     }).then((result) => {
       if (!result.success) {
@@ -54,16 +54,27 @@ describe("Compare Instance 1 and Instance 2 Chart Data", () => {
       expect(result.success, "UI verification passed").to.be.true;
     });
   });
-});
-
+}); 
 describe("End-to-End Clean Up", () => {
   it("clean up", () => {
-    const downloadDir = Cypress.env("fixturesDir");
+    const instance2Archive = Cypress.env("archiveInstance2");
+    const instance1Archive = Cypress.env("archiveInstance1");
+    const dashboardUi = Cypress.env("dashboardUi");
     const instance1Dir = Cypress.env("instance1DashboardDir");
     const instance2Dir = Cypress.env("instance2DashboardDir");
 
     cy.log("Clearing contents of downloads directory...");
-    cy.task("clearDirectoryContents", downloadDir).then((result) => {
+    cy.task("clearDirectoryContents", dashboardUi).then((result) => {
+      cy.log(result);
+    });
+
+    cy.log("Clearing contents of downloads directory...");
+    cy.task("clearDirectoryContents", instance1Archive).then((result) => {
+      cy.log(result);
+    });
+
+    cy.log("Clearing contents of downloads directory...");
+    cy.task("clearDirectoryContents", instance2Archive).then((result) => {
       cy.log(result);
     });
 

@@ -3,7 +3,7 @@
 export class DashBoard {
   instance1Dashboard = Cypress.env("instance1Dashboard");
   instance2Dashboard = Cypress.env("instance2Dashboard");
-  tableRowSelector = 'tr[role="row"]'; //ll
+  tableRowSelector = 'tr[role="row"]'; 
   itemNameSelector = "td a";
   shareButtonSelector = 'span[aria-label="share"]';
   importButtonSelector = 'button > span[aria-label="import"]';
@@ -15,9 +15,12 @@ export class DashBoard {
 
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
-    cy.xpath(this.dashboardbtn).click();
-    cy.wait(2000)
-
+    cy.xpath(this.dashboardbtn, { timeout: 20000 })
+      .should('exist')
+      .and('be.visible')
+      .click();
+    cy.log("Dashboard button clicked. Waiting for the dashboard to load...");
+    cy.get('body', { timeout: 20000 }).should('not.have.class', 'loading');
   }
 
 

@@ -30,6 +30,8 @@ export class LoginPage {
 
   clickLoginButton() {
     cy.log("Clicking the login button...");
-    cy.get(this.loginButton).click();
-  }
+    cy.get(this.loginButton, { timeout: 10000 })
+      .should('be.visible')
+      .click();
+}
 }

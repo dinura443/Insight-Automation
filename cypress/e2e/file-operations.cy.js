@@ -18,15 +18,16 @@ describe("Export the Dashboard (instance: 1)", () => {
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
-    cy.wait(2000);
 
     dashboard.visitDashboard();
     cy.log("Navigating to the dashboard page...");
     cy.wait(2000);
 
+
     const itemName = Cypress.env("dashboard");
     cy.log(`Finding dashboard name: ${itemName}`);
     dashboard.findRowByItemName(itemName);
+    cy.wait(2000);
     cy.log("Clicking on the item name...");
 
     cy.log("Downloading the dashboard...");
@@ -78,10 +79,14 @@ describe("Backup the Dashboard File to The Server (instance: 2)", () => {
     login.clickLoginButton();
 
     dashboard.visitDashboard();
+    cy.wait(2000);
+
     const itemName = Cypress.env("dashboard");
     dashboard.findRowByItemName(itemName);
+    cy.wait(2000);
     dashboard.clickShareButtonForRow(itemName);
     cy.wait(2000);
+
 
     cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
       if (!latestFilePath) {
@@ -115,8 +120,9 @@ describe("Scrape the dashboard details from the instance1 dashboard (instance: 1
     login.clickLoginButton();
 
     dashboard.visitDashboard();
-    cy.wait(2000);
     cy.log("Navigating to the dashboard page...");
+    cy.wait(2000);
+
 
     const itemName = Cypress.env("dashboard");
     const instanceLabel = "instance1";
@@ -160,7 +166,9 @@ describe("Import the dashboard from the instance1 (instance: 2)", () => {
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
-    cy.wait(2000);
+    dashboard.visitDashboard();
+    cy.log("Navigating to the dashboard page...");
+    cy.wait(4000);
 
     cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
       if (!latestFilePath) {
@@ -169,21 +177,21 @@ describe("Import the dashboard from the instance1 (instance: 2)", () => {
       const fileName = Cypress._.last(latestFilePath.split("/"));
       const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
 
-      dashboard.visitDashboard();
-      cy.log("Navigating to the dashboard page...");
-      cy.wait(2000);
+
+
 
       dashboard.uploadSpecificFile(targetUrl, desiredFilePath);
       cy.log("Uploading the dashboard file...");
       cy.wait(2000);
 
       dashboard.overWriteDashboard();
+      cy.wait(2000);
     });
     cy.log("Importing the dashboard file from the instance one retrieved from the file instance1Archive completed successfully.");
   });
 });
 
-describe("crape the dashboard details from the instance2 dashboard ( instance : 2 )", () => {
+describe("Scrape the dashboard details from the instance2 dashboard ( instance : 2 )", () => {
 
   const itemName = Cypress.env("dashboard");
   const instanceLabel = 'instance2'; 
@@ -196,13 +204,13 @@ describe("crape the dashboard details from the instance2 dashboard ( instance : 
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
-    cy.wait(2000);
 
 
 
     dashboard.visitDashboard();
     cy.log("Navigating to the dashboard page...");
     cy.wait(2000);
+
  
     cy.log(`Searching for item name: "${itemName}"`);
     dashboard.findRowByItemName(itemName)
@@ -228,11 +236,13 @@ describe("crape the dashboard details from the instance2 dashboard ( instance : 
   });
 });
 
+
+
 describe("Export a dashboard from the instance two for verification purposes ( instance : 2 )", () => {
   const originalDownloadPath = Cypress.env("downloadDir");
-  const fixturesDir = Cypress.env("fixturesDir");
+  const archiveInstance2 = Cypress.env("archiveInstance2");
   const itemName = Cypress.env("dashboard");
-  const desiredDownloadPath = "downloads";
+  const desiredDownloadPath = "instance2Archive";
   const instance2Dir = Cypress.env("instance2DashboardDir");
 
 
@@ -247,10 +257,13 @@ describe("Export a dashboard from the instance two for verification purposes ( i
 
     dashboard.visitDashboard();
     cy.log("Navigating to the dashboard page...");
-    cy.wait(1000)
+    cy.wait(2000);
+
 
     cy.log(`Using dashboard name: ${itemName}`);
     dashboard.findRowByItemName(itemName);
+    cy.wait(2000);
+
 
     dashboard.clickShareButtonForRow(itemName);
     cy.log("Downloading the dashboard..."); 
@@ -271,9 +284,9 @@ describe("Export a dashboard from the instance two for verification purposes ( i
       }).then((result) => {
         cy.log(result);
       });
-      cy.task("getLatestFile", fixturesDir).then((latestFilePath) => {
+      cy.task("getLatestFile", archiveInstance2).then((latestFilePath) => {
         if (!latestFilePath) {
-          throw new Error(`No files found in directory: ${fixturesDir}`);
+          throw new Error(`No files found in directory: ${archiveInstance2}`);
         }
         const zipPath = latestFilePath;
         const extractDir = instance2Dir;

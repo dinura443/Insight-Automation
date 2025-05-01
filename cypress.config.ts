@@ -25,14 +25,12 @@ export default defineConfig({
     password: process.env.PASSWORD,
     dashboard: process.env.DASHBOARD_NAME,
     downloadDir: process.env.DOWNLOAD_DIR,
-    fixturesDir: process.env.FIXTURES,
+    archiveInstance2: process.env.ARCHIVEINSTANCE2,
     instance1DashboardDir: process.env.DASHBOARD_INSTANCE1,
     instance2DashboardDir: process.env.DASHBOARD_INSTANCE2,
     instance1Login: process.env.INSTANCE1_LOGIN,
     instance2Login: process.env.INSTANCE2_LOGIN,
-    instance1Dashboard: process.env.INSTANCE1_DASHBOARD,
-    instance2Dashboard: process.env.INSTANCE2_DASHBOARD,
-    datapath: process.env.DASHBOARD_UI,
+    dashboardUi: process.env.DASHBOARD_UI,
     backupDir: process.env.BACKUP,
     rootDir : process.env.ROOT_DIR,
     archiveInstance1: process.env.ARCHIVEINSTANCE1
@@ -313,8 +311,8 @@ export default defineConfig({
 
 
       on("task", {
-        verifyUiContents({ dataPath, itemName }) {
-          const uiVerifier = new UiVerifier(dataPath, itemName);
+        verifyUiContents({ dashboardUi, itemName }) {
+          const uiVerifier = new UiVerifier(dashboardUi, itemName);
           const result = uiVerifier.verify();
           return result;
         },

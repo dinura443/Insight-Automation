@@ -3,11 +3,11 @@ import * as fs from "fs";
 import path from "path";
 
 export class UiVerifier {
-  private dataPath: string;
+  private dashboardUi: string;
   private itemName: string;
 
-  constructor(dataPath: string, itemName: string) {
-    this.dataPath = dataPath; 
+  constructor(dashboardUi: string, itemName: string) {
+    this.dashboardUi = dashboardUi; 
     this.itemName = itemName; 
   }
 
@@ -59,8 +59,8 @@ export class UiVerifier {
 
   
   public verify(): { success: boolean; summary: any } {
-    const instance1FilePath = path.join(this.dataPath, `instance1_${this.itemName}_charts.json`);
-    const instance2FilePath = path.join(this.dataPath, `instance2_${this.itemName}_charts.json`);
+    const instance1FilePath = path.join(this.dashboardUi, `instance1_${this.itemName}_charts.json`);
+    const instance2FilePath = path.join(this.dashboardUi, `instance2_${this.itemName}_charts.json`);
 
     console.log(`Comparing UI contents for: ${this.itemName}`);
     console.log(`Instance 1 file path: ${instance1FilePath}`);
