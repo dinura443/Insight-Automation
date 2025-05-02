@@ -18,10 +18,13 @@ describe("Export the Dashboard (instance: 1)", () => {
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
+    cy.wait(2000);
+
 
     dashboard.visitDashboard();
+    cy.wait(5000);
+
     cy.log("Navigating to the dashboard page...");
-    cy.wait(2000);
 
 
     const itemName = Cypress.env("dashboard");
@@ -71,15 +74,18 @@ describe("Export the Dashboard (instance: 1)", () => {
 
 describe("Backup the Dashboard File to The Server (instance: 2)", () => {
   const downloadDirectory = Cypress.env("downloadDir");
+  const statusFile = "cypress/fixtures/test-status.json";
 
   it("Download and save dashboard backup", () => {
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
+    cy.wait(2000);
 
     dashboard.visitDashboard();
-    cy.wait(2000);
+    cy.wait(5000);
+
 
     const itemName = Cypress.env("dashboard");
     dashboard.findRowByItemName(itemName);
@@ -87,28 +93,29 @@ describe("Backup the Dashboard File to The Server (instance: 2)", () => {
     dashboard.clickShareButtonForRow(itemName);
     cy.wait(2000);
 
-
     cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
       if (!latestFilePath) {
+        cy.writeFile(statusFile, { backupTestPassed: false });
         throw new Error(`No files found in directory: ${downloadDirectory}`);
       }
-    
+
       const fileName = Cypress._.last(latestFilePath.split("/"));
       const originalFilePath = latestFilePath;
       const destinationPath = `cypress/fixtures/backups/${fileName}`;
-    
+
       cy.task("moveFile", {
         source: originalFilePath,
         destination: destinationPath,
       }).then((result) => {
         cy.log(result);
+        cy.writeFile(statusFile, { backupTestPassed: true });
       });
-    
+      
       cy.writeFile("cypress/fixtures/filename.txt", fileName);
     });
-    
   });
 });
+
 
 
 describe("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
@@ -118,10 +125,11 @@ describe("Scrape the dashboard details from the instance1 dashboard (instance: 1
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
+    cy.wait(2000);
+
 
     dashboard.visitDashboard();
-    cy.log("Navigating to the dashboard page...");
-    cy.wait(2000);
+    cy.wait(5000);
 
 
     const itemName = Cypress.env("dashboard");
@@ -136,7 +144,7 @@ describe("Scrape the dashboard details from the instance1 dashboard (instance: 1
       .then(() => {
         cy.log(`Found "${itemName}" on the dashboard.`);
         dashboard.clickItemName(itemName);
-        cy.wait(2000);
+        cy.wait(10000); // wait 10 seconds (adjust as needed)
         cy.log("Waiting for dashboard charts to load...");
         cy.get(".dashboard-component", { timeout: 2000 }).should("exist");
         cy.log("Scraping charts on the specific dashboard...");
@@ -155,41 +163,53 @@ describe("Scrape the dashboard details from the instance1 dashboard (instance: 1
   });
 });
 
+
+
 describe("Import the dashboard from the instance1 (instance: 2)", () => {
+  const statusFile = "cypress/fixtures/test-status.json";
   const targetUrl = Cypress.env("instance2Dashboard");
   const dashboardInstance1Archive = Cypress.env("archiveInstance1");
   const desiredDownloadPath = "instance1Archive";
+  const dashboardName = Cypress.env("dashboard");
 
-  it("Importing the dashboard file from the instance one retrieved from the file instance1Archive", () => {
-    cy.log("Logging in...");
-    login.visitInstance2();
-    login.enterUsername(Cypress.env("username"));
-    login.enterPassword(Cypress.env("password"));
-    login.clickLoginButton();
-    dashboard.visitDashboard();
-    cy.log("Navigating to the dashboard page...");
-    cy.wait(4000);
-
-    cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
-      if (!latestFilePath) {
-        throw new Error(`No files found in directory: ${dashboardInstance1Archive}`);
+  it("Importing the dashboard file from instance one", () => {
+    cy.readFile(statusFile).then((status) => {
+      if (!status.backupTestPassed) {
+        throw new Error("Backup test failed — skipping import.");
       }
-      const fileName = Cypress._.last(latestFilePath.split("/"));
-      const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
+
+      cy.log("Logging in...");
+      login.visitInstance2();
+      login.enterUsername(Cypress.env("username"));
+      login.enterPassword(Cypress.env("password"));
+      login.clickLoginButton();
+    cy.wait(2000);
 
 
+      dashboard.visitDashboard();
+      cy.log("Navigating to the dashboard page...");
+      cy.wait(5000);
 
+      dashboard.analyzeDashboardlist(dashboardName);
 
-      dashboard.uploadSpecificFile(targetUrl, desiredFilePath);
-      cy.log("Uploading the dashboard file...");
-      cy.wait(2000);
+      cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
+        if (!latestFilePath) {
+          throw new Error(`No files found in directory: ${dashboardInstance1Archive}`);
+        }
 
-      dashboard.overWriteDashboard();
-      cy.wait(2000);
+        const fileName = Cypress._.last(latestFilePath.split("/"));
+        const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
+
+        cy.log("Uploading the dashboard file...");
+        dashboard.uploadSpecificFile(targetUrl, desiredFilePath);
+        cy.wait(2000);
+
+        cy.log("Dashboard import completed successfully.");
+      });
     });
-    cy.log("Importing the dashboard file from the instance one retrieved from the file instance1Archive completed successfully.");
   });
 });
+
 
 describe("Scrape the dashboard details from the instance2 dashboard ( instance : 2 )", () => {
 
@@ -204,12 +224,14 @@ describe("Scrape the dashboard details from the instance2 dashboard ( instance :
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
+    cy.wait(2000);
+
 
 
 
     dashboard.visitDashboard();
     cy.log("Navigating to the dashboard page...");
-    cy.wait(2000);
+    cy.wait(5000);
 
  
     cy.log(`Searching for item name: "${itemName}"`);
@@ -254,10 +276,9 @@ describe("Export a dashboard from the instance two for verification purposes ( i
     login.clickLoginButton();
     cy.wait(2000);
 
-
     dashboard.visitDashboard();
+    cy.wait(5000);
     cy.log("Navigating to the dashboard page...");
-    cy.wait(2000);
 
 
     cy.log(`Using dashboard name: ${itemName}`);

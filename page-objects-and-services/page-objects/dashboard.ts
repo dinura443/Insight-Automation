@@ -10,24 +10,27 @@ export class DashBoard {
   selectFileInputSelector = "#modelFile";
   importDialogImportButtonSelector = 'button[type="submit"][data-title="Import"]';
   dashboardbtn="//a[normalize-space()='Dashboards']";
+  deleteBtn="(//span[@aria-label='trash'])[1]";
+  deleteTxtBox="(//input[@id='delete'])[1]";
+  deleteConfirmBtn="(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-dangerous antd5-btn-color-dangerous antd5-btn-variant-solid superset-button superset-button-danger cta css-1pe2gaq'])[1]";
 
   importbutton = "//span[normalize-space()='Import']";
 
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
-    cy.xpath(this.dashboardbtn, { timeout: 20000 })
-      .should('exist')
-      .and('be.visible')
+  
+    cy.xpath(this.dashboardbtn)
       .click();
-    cy.log("Dashboard button clicked. Waiting for the dashboard to load...");
-    cy.get('body', { timeout: 20000 }).should('not.have.class', 'loading');
+  
+    cy.wait(10000); // wait 10 seconds (adjust as needed)
   }
+  
+  
 
 
   findRowByItemName(itemName: string) {
     cy.log(`Searching for item name: "${itemName}"`);
-    cy.wait(1000);
-    return cy.contains(this.itemNameSelector, itemName, { timeout: 20000 })
+    return cy.contains(this.itemNameSelector, itemName)
       .should("exist")
       .and("be.visible")
       .then(($element) => {
@@ -58,21 +61,53 @@ export class DashBoard {
       });
   }
 
-overWriteDashboard() {
+  analyzeDashboardlist(dashboard: string) {
+    cy.get('body').then($body => {
+      const matchingRow = $body.find(`tr:contains("${dashboard}")`);
+  
+      if (matchingRow.length > 0) {
+        cy.log(`${dashboard} exists in the dashboard list.`);
+        this.deleteDashboard(dashboard);
+      } else {
+        cy.log(`${dashboard} does NOT exist in the dashboard list.`);
+        // Optional: handle non-existence
+      }
+    });
+  }
+  
 
-  const overwriteInputSelector = '#overwrite';
-  const overwriteButtonSelector = 'button:contains("Overwrite")';
 
 
-  cy.get(overwriteInputSelector).type('OVERWRITE');
-  cy.log('Typed "OVERWRITE" into the input field.');
 
-  cy.get(overwriteButtonSelector)
-  .should('exist')
-  .and('be.visible')
-  .click();
-  cy.log('Clicked the "Overwrite" button.');
 
+
+deleteDashboard(itemName: string) {
+
+
+  this.findRowByItemName(itemName)
+  .should("exist")
+  .within(() => {
+
+    cy.xpath(this.deleteBtn, { timeout: 2000 })
+    .should('exist')
+    .click();
+    cy.log('Clicked the "Delete" button.');
+  
+    cy.xpath(this.deleteTxtBox, { timeout: 2000 }) // select the element via XPath
+    .should('exist')
+    .and('be.visible')
+    .type('DELETE') // now type into it
+    .then(() => {
+      cy.log('Typed "DELETE" into the input field.');
+    });
+  
+    cy.xpath(this.deleteConfirmBtn, { timeout: 2000 })
+    .should('exist')
+    .and('be.visible')
+    .click();
+    cy.log('Clicked the "Confirm" button.');
+
+  });
 
 }
 

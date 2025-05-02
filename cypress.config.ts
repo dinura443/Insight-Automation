@@ -4,7 +4,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { VerifyExporter } from "./page-objects-and-services/page-objects/file-Verification";
 import { UiVerifier } from "./page-objects-and-services/page-objects/ui-Verification";
-const { NodeSSH } = require('node-ssh');
 
 dotenv.config();
 
@@ -14,7 +13,11 @@ interface ChartData {
   alignment: string;
 }
 
+
+
+
 export default defineConfig({
+
   chromeWebSecurity: false,
   retries: {
     runMode: 0,
@@ -46,6 +49,15 @@ export default defineConfig({
       require("@cypress/grep/src/plugin")(config);
       require("cypress-terminal-report/src/installLogsPrinter")(on);
 
+
+
+
+
+      on('task', {
+        fileExists(filePath: string) {
+          return fs.existsSync(filePath);
+        },
+      });
 
 
 
