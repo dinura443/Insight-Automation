@@ -49,8 +49,10 @@ jobs:
             cypress/fixtures/backups/$BACKUP_NAME \
             AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups/
 
-      - name: Remove files older than 7 days on server
+      - name: Remove files older than 24 hours on server
         run: |
           ssh -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             AccumeticUser@34.71.130.138 \
-            'find /home/AccumeticUser/cypress-backups/backups -type f -mtime +7 -exec rm -f {} \;'
+            'find /home/AccumeticUser/cypress-backups/backups -type f -mmin +1440 -exec rm -f {} \;'
+
+
