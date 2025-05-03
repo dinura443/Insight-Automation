@@ -44,15 +44,14 @@ jobs:
 
       - name: Upload dashboard backup to server
         run: |
-          echo "Uploading $BACKUP_NAME to server..."
+          echo "Uploading ${{ env.BACKUP_NAME }} to server..."
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            cypress/fixtures/backups/$BACKUP_NAME \
-            AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups/
+            cypress/fixtures/backups/${{ env.BACKUP_NAME }} \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/cypress-backups/backups/
 
       - name: Remove files older than 24 hours on server
         run: |
           ssh -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            AccumeticUser@34.71.130.138 \
-            'find /home/AccumeticUser/cypress-backups/backups -type f -mmin +1440 -exec rm -f {} \;'
-
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
+            'find /home/${{ secrets.REMOTE_USER }}/cypress-backups/backups -type f -mmin +1440 -exec rm -f {} \;'
 

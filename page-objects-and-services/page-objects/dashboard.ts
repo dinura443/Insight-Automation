@@ -22,7 +22,7 @@ export class DashBoard {
     cy.xpath(this.dashboardbtn)
       .click();
   
-    cy.wait(10000); // wait 10 seconds (adjust as needed)
+    cy.wait(10000);
   }
   
   
@@ -77,10 +77,10 @@ export class DashBoard {
   
 
   typeInputAndPressEnter(text: string): void {
-    cy.get('.ant-input-affix-wrapper.css-1ij993o') // Parent wrapper
-      .find('input') // Target the actual input
-      .should('be.visible') // Ensure it's ready
-      .type(`${text}{enter}`); // Type and press Enter
+    cy.get('.ant-input-affix-wrapper.css-1ij993o') 
+      .find('input') 
+      .should('be.visible') 
+      .type(`${text}{enter}`); 
   }
 
 
@@ -98,10 +98,10 @@ deleteDashboard(itemName: string) {
     .click();
     cy.log('Clicked the "Delete" button.');
   
-    cy.xpath(this.deleteTxtBox, { timeout: 2000 }) // select the element via XPath
+    cy.xpath(this.deleteTxtBox, { timeout: 2000 }) 
     .should('exist')
     .and('be.visible')
-    .type('DELETE') // now type into it
+    .type('DELETE') 
     .then(() => {
       cy.log('Typed "DELETE" into the input field.');
     });
@@ -136,7 +136,7 @@ deleteDashboard(itemName: string) {
         let title = extractTitle();
 
         if (!title) {
-          cy.wait(500); // Retry wait
+          cy.wait(500);
           title = extractTitle();
         }
 
