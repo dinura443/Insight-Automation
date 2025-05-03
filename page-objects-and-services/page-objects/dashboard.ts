@@ -80,7 +80,6 @@ export class DashBoard {
     cy.get('.ant-input-affix-wrapper.css-1ij993o') // Parent wrapper
       .find('input') // Target the actual input
       .should('be.visible') // Ensure it's ready
-      .clear() // Optional: Clear existing text
       .type(`${text}{enter}`); // Type and press Enter
   }
 
