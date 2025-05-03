@@ -1,5 +1,6 @@
-describe("Verify the Dashboard file contents of export & import", () => {
-  it("should match latest exported and imported dashboard files", () => {
+describe("Verification Process", () => {
+
+  it("Performing the file verification", () => {
     const instance1DashboardDir = Cypress.env("instance1DashboardDir");
     const instance2DashboardDir = Cypress.env("instance2DashboardDir");
 
@@ -33,8 +34,8 @@ describe("Verify the Dashboard file contents of export & import", () => {
   });
 });
 
-describe("Compare Instance 1 and Instance 2 Chart Data", () => {
-  it("Should compare the chart data between instance 1 and instance 2", () => {
+describe("Verification Process", () => {
+  it("Performing the UI Verification", () => {
     const dashboardUi = Cypress.env("dashboardUi");
     const itemName = Cypress.env("dashboard");
 
@@ -55,8 +56,9 @@ describe("Compare Instance 1 and Instance 2 Chart Data", () => {
     });
   });
 }); 
-describe("End-to-End Clean Up", () => {
-  it("clean up", () => {
+describe("Verification Process", () => {
+
+  it("End-to-End Clean Up", () => {
     const instance2Archive = Cypress.env("archiveInstance2");
     const instance1Archive = Cypress.env("archiveInstance1");
     const dashboardUi = Cypress.env("dashboardUi");

@@ -5,13 +5,13 @@ const login = new LoginPage();
 const dashboard = new DashBoard();
 
 
-describe("Export the Dashboard (instance: 1)", () => {
+describe("File Operations", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectory = Cypress.env("instance1DashboardDir");
   const desiredDownloadPath = "instance1Archive";
   const extractDir = targetDirectory;
 
-  it("exporting the file", () => {
+  it("Export the Dashboard (instance: 1)", () => {
     cy.log("username : ", Cypress.env("username"));
     cy.log("Logging in...");
     login.visitInstance1();
@@ -73,11 +73,11 @@ describe("Export the Dashboard (instance: 1)", () => {
   });
 });
 
-describe("Backup the Dashboard File to The Server (instance: 2)", () => {
+describe("File Operations", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const statusFile = "cypress/fixtures/test-status.json";
 
-  it("Download and save dashboard backup", () => {
+  it("Backup the Dashboard File to The Server (instance: 2)", () => {
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
@@ -121,8 +121,8 @@ describe("Backup the Dashboard File to The Server (instance: 2)", () => {
 
 
 
-describe("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
-  it("Collect the dashboard details and save them to a JSON file in the UIComponents directory", () => {
+describe("File Operations", () => {
+  it("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -168,14 +168,14 @@ describe("Scrape the dashboard details from the instance1 dashboard (instance: 1
 
 
 
-describe("Import the dashboard from the instance1 (instance: 2)", () => {
+describe("File Operations", () => {
   const statusFile = "cypress/fixtures/test-status.json";
   const targetUrl = Cypress.env("instance2Dashboard");
   const dashboardInstance1Archive = Cypress.env("archiveInstance1");
   const desiredDownloadPath = "instance1Archive";
   const dashboardName = Cypress.env("dashboard");
 
-  it("Importing the dashboard file from instance one", () => {
+  it("Import the dashboard from the instance1 (instance: 2)", () => {
     cy.readFile(statusFile).then((status) => {
       if (!status.backupTestPassed) {
         throw new Error("Backup test failed — skipping import.");
@@ -215,14 +215,14 @@ describe("Import the dashboard from the instance1 (instance: 2)", () => {
 });
 
 
-describe("Scrape the dashboard details from the instance2 dashboard ( instance : 2 )", () => {
+describe("File Operations", () => {
 
   const itemName = Cypress.env("dashboard");
   const instanceLabel = 'instance2'; 
   const fileName = `${instanceLabel}_${itemName}_charts.json`;
   const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
 
-  it("Collect the dashboard details and save them to a json file in the UIComponents directory ", () => {
+  it("Scrape the dashboard details from the instance2 dashboard ( instance : 2 )", () => {
     cy.log("Logging in...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -266,7 +266,7 @@ describe("Scrape the dashboard details from the instance2 dashboard ( instance :
 
 
 
-describe("Export a dashboard from the instance two for verification purposes ( instance : 2 )", () => {
+describe("File Operations", () => {
   const originalDownloadPath = Cypress.env("downloadDir");
   const archiveInstance2 = Cypress.env("archiveInstance2");
   const itemName = Cypress.env("dashboard");
@@ -274,7 +274,7 @@ describe("Export a dashboard from the instance two for verification purposes ( i
   const instance2Dir = Cypress.env("instance2DashboardDir");
 
 
-  it("export a file to the file dashboard_instance2", () => {
+  it("Export a dashboard from the instance two for verification purposes ( instance : 2 )", () => {
     cy.log("Logging in...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
