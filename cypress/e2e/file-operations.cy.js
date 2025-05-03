@@ -26,8 +26,9 @@ describe("Export the Dashboard (instance: 1)", () => {
 
     cy.log("Navigating to the dashboard page...");
 
-
     const itemName = Cypress.env("dashboard");
+    dashboard.typeInputAndPressEnter(itemName);
+    cy.wait(2000);
     cy.log(`Finding dashboard name: ${itemName}`);
     dashboard.findRowByItemName(itemName);
     cy.wait(2000);
@@ -88,6 +89,8 @@ describe("Backup the Dashboard File to The Server (instance: 2)", () => {
 
 
     const itemName = Cypress.env("dashboard");
+    dashboard.typeInputAndPressEnter(itemName);
+    cy.wait(2000);
     dashboard.findRowByItemName(itemName);
     cy.wait(2000);
     dashboard.clickShareButtonForRow(itemName);
@@ -130,13 +133,13 @@ describe("Scrape the dashboard details from the instance1 dashboard (instance: 1
 
     dashboard.visitDashboard();
     cy.wait(5000);
-
-
     const itemName = Cypress.env("dashboard");
     const instanceLabel = "instance1";
     const fileName = `${instanceLabel}_${itemName}_charts.json`;
     const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
     cy.log(`Searching for the dashboard name: "${itemName}"`);
+    cy.wait(2000);
+    dashboard.typeInputAndPressEnter(itemName);
     cy.wait(2000);
     dashboard.findRowByItemName(itemName)
       .should("exist")
@@ -190,6 +193,7 @@ describe("Import the dashboard from the instance1 (instance: 2)", () => {
       cy.log("Navigating to the dashboard page...");
       cy.wait(5000);
 
+
       dashboard.analyzeDashboardlist(dashboardName);
 
       cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
@@ -232,6 +236,8 @@ describe("Scrape the dashboard details from the instance2 dashboard ( instance :
     dashboard.visitDashboard();
     cy.log("Navigating to the dashboard page...");
     cy.wait(5000);
+    dashboard.typeInputAndPressEnter(itemName);
+    cy.wait(2000);
 
  
     cy.log(`Searching for item name: "${itemName}"`);
@@ -279,6 +285,8 @@ describe("Export a dashboard from the instance two for verification purposes ( i
     dashboard.visitDashboard();
     cy.wait(5000);
     cy.log("Navigating to the dashboard page...");
+    dashboard.typeInputAndPressEnter(itemName);
+    cy.wait(2000);
 
 
     cy.log(`Using dashboard name: ${itemName}`);
