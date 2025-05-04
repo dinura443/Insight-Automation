@@ -77,7 +77,7 @@ export class DashBoard {
   
 
   typeInputAndPressEnter(text: string): void {
-    cy.get('.ant-input-affix-wrapper.css-1ij993o') 
+    cy.get('.ant-input-affix-wrapper.css-1ij993o',{ timeout: 10000 }) 
       .find('input') 
       .should('be.visible') 
       .type(`${text}{enter}`); 
