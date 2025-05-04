@@ -40,7 +40,6 @@
     "@types/uuid": "^10.0.0",
     "allure-commandline": "^2.24.1",
     "allure-service-client": "^1.0.2",
-    "cypress": "^12.0.0",
     "cypress-downloadfile": "^1.2.4",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.1",
@@ -60,6 +59,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.5.16",
+    "cypress": "^12.17.4",
     "dotenv": "^16.5.0",
     "fs-extra": "^11.3.0",
     "inquirer": "^12.5.2",
