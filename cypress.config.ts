@@ -36,7 +36,8 @@ export default defineConfig({
     dashboardUi: process.env.DASHBOARD_UI,
     backupDir: process.env.BACKUP,
     rootDir : process.env.ROOT_DIR,
-    archiveInstance1: process.env.ARCHIVEINSTANCE1
+    archiveInstance1: process.env.ARCHIVEINSTANCE1,
+    backupStatusDir: process.env.BACKUPSTATUSDIR
 
   },
   e2e: {

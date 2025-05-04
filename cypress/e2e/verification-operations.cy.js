@@ -64,6 +64,8 @@ describe("Verification Process", () => {
     const dashboardUi = Cypress.env("dashboardUi");
     const instance1Dir = Cypress.env("instance1DashboardDir");
     const instance2Dir = Cypress.env("instance2DashboardDir");
+    const backupStatusDir = Cypress.env("backupStatusDir");
+
 
     cy.log("Clearing contents of downloads directory...");
     cy.task("clearDirectoryContents", dashboardUi).then((result) => {
@@ -89,6 +91,17 @@ describe("Verification Process", () => {
     cy.task("clearDirectoryContents", instance2Dir).then((result) => {
       cy.log(result);
     });
+
+
+    cy.log("Clearing the rest of the temp directories...");
+    cy.task("deleteFile", backupStatusDir).then((result) => {
+      cy.log(result);
+    });
+
   });
+
+
+
+
 });
 
