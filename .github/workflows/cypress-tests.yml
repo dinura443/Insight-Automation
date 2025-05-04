@@ -32,7 +32,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Run Cypress Tests
-        run: npx cypress run | grep -v "deprecated\|vulnerabilities\|Task without title"
+        run: npx cypress run
         continue-on-error: true
 
       - name: Get backup filename
