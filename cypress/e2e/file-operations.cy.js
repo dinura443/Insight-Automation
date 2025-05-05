@@ -19,11 +19,8 @@ describe("File Operations", () => {
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
     cy.wait(2000);
-
-
     dashboard.visitDashboard();
     cy.wait(5000);
-
     cy.log("Navigating to the dashboard page...");
 
     const itemName = Cypress.env("dashboard");
@@ -194,6 +191,8 @@ describe("File Operations", () => {
       cy.wait(5000);
 
 
+      dashboard.typeInputAndPressEnter(dashboardName);
+      cy.wait(2000);
       dashboard.analyzeDashboardlist(dashboardName);
 
       cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {

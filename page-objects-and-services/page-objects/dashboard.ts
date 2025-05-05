@@ -63,6 +63,7 @@ export class DashBoard {
 
   analyzeDashboardlist(dashboard: string) {
     cy.get('body').then($body => {
+
       const matchingRow = $body.find(`tr:contains("${dashboard}")`);
   
       if (matchingRow.length > 0) {
@@ -74,6 +75,9 @@ export class DashBoard {
       }
     });
   }
+
+
+
   
 
   typeInputAndPressEnter(text: string): void {
