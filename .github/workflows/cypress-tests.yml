@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "Uploading ${{ env.BACKUP_NAME }} to server..."
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            cypress/fixtures/backups/${{ env.BACKUP_NAME }} \
+            cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/cypress-backups/backups/
 
       - name: Remove files older than 24 hours on server
