@@ -1,9 +1,16 @@
 name: insight cypress-tests
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      username:
+        type: string
+        description: "Username for login"
+        required: true
+      password:
+        type: string
+        description: "Password for login"
+        required: true
 
 jobs:
   build:
@@ -24,6 +31,11 @@ jobs:
       - name: Unset variable 
         run: npm run unset
 
+      - name: Set env variables from input
+        run: |
+          echo "USERNAME=${{ github.event.inputs.username }}" >> $GITHUB_ENV
+          echo "PASSWORD=${{ github.event.inputs.password }}" >> $GITHUB_ENV
+
       - name: Create SSH key
         run: |
           echo "$SSH_PRIVATE_KEY" > AccumeticKey.pem
@@ -34,7 +46,6 @@ jobs:
       - name: Run Cypress Tests
         run: npx cypress run
         continue-on-error: true
-
 
       - name: Get backup filename
         id: get_name
@@ -55,4 +66,3 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
             'find /home/${{ secrets.REMOTE_USER }}/cypress-backups/backups -type f -mmin +1440 -exec rm -f {} \;'
-
