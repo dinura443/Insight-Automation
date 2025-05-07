@@ -38,17 +38,16 @@ export class DashBoard {
     cy.wait(1000); // Small delay for checkboxes to appear
 
     // Step 2: Loop through each dashboard name and check the box
-    dashboardNames.forEach((name, index) => {
+    dashboardNames.forEach((name) => {
       cy.contains(this.itemNameSelector, name).then(($row) => {
         const row = Cypress.$($row).closest("tr");
-        const checkboxId = index.toString();
-        const checkboxXPath = `//input[@id='${checkboxId}']`;
 
+        // Within this row, find the checkbox input
         cy.wrap(row).within(() => {
-          cy.xpath(checkboxXPath)
-            .check({ force: true })
-            .log(`Checked dashboard: "${name}"`);
+          cy.get("input[type='checkbox']").check({ force: true });
         });
+
+        cy.log(`Checked dashboard: "${name}"`);
       });
     });
 
@@ -58,11 +57,12 @@ export class DashBoard {
       .click({ force: true });
     cy.log("Clicked Export button");
 
-    // Step 4: Wait for download to start
-    cy.wait(3000); // Replace this with proper wait logic if possible
+    // Step 4: Wait for download
+    cy.wait(3000); // Replace with better wait logic if possible
 
     cy.log("Bulk export completed successfully.");
   }
+
 
   
 

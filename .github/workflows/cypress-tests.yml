@@ -11,6 +11,10 @@ on:
         type: string
         description: "Password for login"
         required: true
+      dashboards:
+          type: string
+          description: "Comma-separated list of dashboard names to export"
+          required: true
 
 jobs:
   build:
@@ -35,6 +39,7 @@ jobs:
         run: |
           echo "USERNAME=${{ github.event.inputs.username }}" >> $GITHUB_ENV
           echo "PASSWORD=${{ github.event.inputs.password }}" >> $GITHUB_ENV
+          echo "DASHBOARD_NAMES=${{ github.event.inputs.dashboards }}" >> $GITHUB_ENV
 
       - name: Create SSH key
         run: |

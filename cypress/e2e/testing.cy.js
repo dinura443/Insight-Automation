@@ -5,8 +5,22 @@ const login = new LoginPage();
 const dashboard = new DashBoard();
 
 describe("Bulk Dashboard Export", () => {
-    const dashboardNames = ["Overview 6.0", "Factory View 6.0", "dinura"];
+    let dashboardNames = [];
+
+    before(() => {
+      // Get dashboard names from env
+      const envList = Cypress.env("DASHBOARD_NAMES");
   
+      // Ensure we got something valid
+      if (!envList || typeof envList !== "string" || envList.trim() === "") {
+        throw new Error("No dashboard names provided! Set DASHBOARD_NAMES env var.");
+      }
+  
+      // Split into array and trim whitespace
+      dashboardNames = envList.split(",").map((name) => name.trim());
+  
+      cy.log(`Dashboards to export: ${dashboardNames.join(", ")}`);
+    });
     beforeEach(() => {
       login.visitInstance1();
       login.enterUsername(Cypress.env("username"));
