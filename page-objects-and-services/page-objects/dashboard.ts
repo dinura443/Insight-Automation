@@ -16,9 +16,20 @@ export class DashBoard {
   bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
   importbutton = "//span[normalize-space()='Import']";
   exportButton ="//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
+   overwriteInputSelector = "#overwrite";
+   overwriteButtonSelector = 'button:contains("Overwrite")';
 
 
 
+
+  
+   clickBulkSelectButton() {
+    cy.log("Clicking the 'Bulk Select' button...");
+    cy.xpath(this.bulkSelectBtn)
+      .should('exist')
+      .and('be.visible')
+      .click();
+   }
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
   
@@ -28,39 +39,70 @@ export class DashBoard {
     cy.wait(10000);
   }
 
+   confirmOverwrite() {
+
+    cy.get(this.overwriteInputSelector)
+      .should('be.visible')
+      .clear()
+      .type('OVERWRITE');
+  
+    cy.get(this.overwriteButtonSelector)
+      .should('exist')
+      .and('be.visible')
+      .click();
+  }
+
   bulkExportDashboards(dashboardNames: string[]): void {
     cy.log(`Starting bulk export for ${dashboardNames.length} dashboards`);
 
-    // Step 1: Click the Bulk Select button
-    cy.xpath(this.bulkSelectBtn)
-      .should("be.visible")
-      .click({ force: true });
-    cy.wait(1000); // Small delay for checkboxes to appear
+    // Step 1: Click "Bulk Select" button
+    cy.xpath(this.bulkSelectBtn).click({ force: true });
+    cy.wait(1000); // Small delay to ensure checkboxes are visible
 
-    // Step 2: Loop through each dashboard name and check the box
-    dashboardNames.forEach((name) => {
-      cy.contains(this.itemNameSelector, name).then(($row) => {
-        const row = Cypress.$($row).closest("tr");
+    // Step 2: Get all dashboard names in order from the DOM
+    const foundDashboardNames: string[] = [];
 
-        // Within this row, find the checkbox input
-        cy.wrap(row).within(() => {
-          cy.get("input[type='checkbox']").check({ force: true });
-        });
+    cy.get("td a").each(($el) => {
+      const name = $el.text().trim();
+      if (name !== "") {
+        foundDashboardNames.push(name);
+      }
+    }).then(() => {
+      // Log full list for debugging
+      cy.log("Found Dashboard List:", JSON.stringify(foundDashboardNames));
 
-        cy.log(`Checked dashboard: "${name}"`);
+      // Step 3: Map desired names to their indices
+      const indicesToCheck = dashboardNames
+        .map((name) => {
+          const index = foundDashboardNames.indexOf(name);
+          if (index === -1) {
+            cy.log(`Dashboard "${name}" not found in list.`);
+            return null;
+          }
+          return index;
+        })
+        .filter((index) => index !== null);
+
+      if (indicesToCheck.length === 0) {
+        throw new Error("No valid dashboard names found to export.");
+      }
+
+      // Step 4: Loop through indices and check checkboxes
+      indicesToCheck.forEach((index) => {
+        const checkboxXPath = `(//input[@id='${index}'])[1]`;
+        cy.xpath(checkboxXPath)
+          .should("exist")
+          .check({ force: true })
+          .log(`Checked dashboard at index ${index}: "${foundDashboardNames[index]}"`);
       });
+
+      // Step 5: Click Export button
+      cy.xpath(this.exportButton)
+        .should("be.visible")
+        .click({ force: true });
+
+      cy.log("✔️ Bulk export completed successfully.");
     });
-
-    // Step 3: Click the Export button
-    cy.xpath(this.exportButton)
-      .should("be.visible")
-      .click({ force: true });
-    cy.log("Clicked Export button");
-
-    // Step 4: Wait for download
-    cy.wait(3000); // Replace with better wait logic if possible
-
-    cy.log("Bulk export completed successfully.");
   }
 
 
@@ -213,7 +255,7 @@ deleteDashboard(itemName: string) {
     });
   }
 
-  uploadSpecificFile(targetUrl: string, filePath: string) {
+  uploadSpecificFile(filePath: string) {
     cy.get(this.importButtonSelector, { timeout: 10000 })
       .should('exist')
       .and('be.visible')

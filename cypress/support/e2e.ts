@@ -28,6 +28,15 @@ registerCypressGrep()
 require('cypress-terminal-report/src/installLogsCollector')();
 require('cypress-downloadfile/lib/downloadFileCommand');
 
+Cypress.on("uncaught:exception", (err, runnable) => {
+    if (err.message.includes("ResizeObserver loop limit exceeded")) {
+      // Ignore ResizeObserver errors
+      return false;
+    }
+    // Rethrow other errors
+    return true;
+  });
+
 // void un-expected token and syntax errors while execute test
 Cypress.on('uncaught:exception', (err, runnable) => {
     console.log(err);

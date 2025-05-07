@@ -33,10 +33,6 @@ export class VerifyExporter {
       const fullPath = path.join(dir, file);
       const stat = fs.statSync(fullPath);
 
-      if (stat.isDirectory() && path.basename(fullPath) === "dashboards") {
-        console.log(`Skipping directory: ${fullPath}`);
-        return;
-      }
 
       if (stat.isDirectory()) {
         files.push(...this.getAllYamlFiles(fullPath, base));
@@ -98,6 +94,7 @@ export class VerifyExporter {
 
     const missingInDir2 = filteredFiles1.filter(f => !filteredFiles2.includes(f));
     const extraInDir2 = filteredFiles2.filter(f => !filteredFiles1.includes(f));
+    
 
     console.log("Comparing folder structures...");
     if (missingInDir2.length || extraInDir2.length) {
