@@ -9,14 +9,16 @@ describe("Bulk Dashboard Export", () => {
     let dashboardNames = [];
 
     before(() => {
-      const envNames = Cypress.env("DASHBOARD_NAMES");
-      if (envNames && typeof envNames === "string") {
-        dashboardNames = envNames.split(",").map((name) => name.trim());
-      } else {
-        dashboardNames = ["Sales Overview"]; // fallback
-      }
-      cy.log(`Dashboards to export: ${dashboardNames.join(", ")}`);
-    });
+        const envNames = Cypress.env("DASHBOARD_NAMES");
+        if (envNames && typeof envNames === "string") {
+          dashboardNames = envNames.split(",").map((name) => name.trim());
+        } else {
+          cy.fixture("default-dashboards.json").then((data) => {
+            dashboardNames = data.dashboards; // ["Sales Overview", ...]
+            Cypress.env("dashboardsToExport", dashboardNames);
+          });
+        }
+      });
 
   
     beforeEach(() => {
