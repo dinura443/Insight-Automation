@@ -29,19 +29,39 @@ export class DashBoard {
   }
 
   bulkExportDashboards(dashboardNames: string[]): void {
-    cy.xpath(this.bulkSelectBtn).click({ force: true });
-    cy.wait(1000);
-  
+    cy.log(`Starting bulk export for ${dashboardNames.length} dashboards`);
+
+    // Step 1: Click the Bulk Select button
+    cy.xpath(this.bulkSelectBtn)
+      .should("be.visible")
+      .click({ force: true });
+    cy.wait(1000); // Small delay for checkboxes to appear
+
+    // Step 2: Loop through each dashboard name and check the box
     dashboardNames.forEach((name, index) => {
-      cy.contains("td a", name)
-        .closest("tr")
-        .within(() => {
-          cy.xpath(`//input[@id='${index}']`).check({ force: true });
+      cy.contains(this.itemNameSelector, name).then(($row) => {
+        const row = Cypress.$($row).closest("tr");
+        const checkboxId = index.toString();
+        const checkboxXPath = `//input[@id='${checkboxId}']`;
+
+        cy.wrap(row).within(() => {
+          cy.xpath(checkboxXPath)
+            .check({ force: true })
+            .log(`Checked dashboard: "${name}"`);
         });
+      });
     });
-  
-    cy.xpath(this.exportButton).click({ force: true });
-    cy.log("Bulk export completed.");
+
+    // Step 3: Click the Export button
+    cy.xpath(this.exportButton)
+      .should("be.visible")
+      .click({ force: true });
+    cy.log("Clicked Export button");
+
+    // Step 4: Wait for download to start
+    cy.wait(3000); // Replace this with proper wait logic if possible
+
+    cy.log("Bulk export completed successfully.");
   }
 
   
