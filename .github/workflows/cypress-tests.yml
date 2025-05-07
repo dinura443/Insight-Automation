@@ -33,7 +33,6 @@ jobs:
 
       - name: Run Cypress Tests
         run: npx cypress run
-        continue-on-error: true
         env:
           DASHBOARD_NAMES: ${{ github.event.inputs.dashboardNames }}
 
