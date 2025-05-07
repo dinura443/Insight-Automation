@@ -1,0 +1,456 @@
+table_name: analytic_comp5.3_data_v3
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: mes_prod
+sql: "SELECT\r\n    o.*,\r\n    (mm/60) AS manhours,\r\n    (plan_manmins/60) AS plan_manhours\r\
+  \nFROM\r\n    (\r\n        SELECT\r\n            DISTINCT tenant_id,\r\n       \
+  \     tenant,\r\n            cluster_id,\r\n            cluster,\r\n           \
+  \ factory_id,\r\n            factory,\r\n            building_id,\r\n          \
+  \  building,\r\n            unit_id,\r\n            unit,\r\n            department_id,\r\
+  \n            department,\r\n            floor_id,\r\n            floor,\r\n   \
+  \         zone_id,\r\n            zone,\r\n            section_id,\r\n         \
+  \   section,\r\n            module_id,\r\n            module\r\n        FROM\r\n\
+  \            comt_operational_structure\r\n        WHERE\r\n            factory_id\
+  \ = {{ \"'\" + current_userfactoryId() + \"'\" }}\r\n    ) as o\r\n    LEFT JOIN\
+  \ (\r\n        SELECT\r\n            module_id,\r\n            sum(mm) as mm\r\n\
+  \        FROM\r\n            (\r\n                SELECT\r\n                   \
+  \ *,\r\n                    any(cum_work_min) OVER (\r\n                       \
+  \ PARTITION BY factory_date,\r\n                        module_id\r\n          \
+  \              ORDER BY\r\n                            ts ROWS BETWEEN 1 PRECEDING\r\
+  \n                            AND 1 PRECEDING\r\n                    ) AS previous_value,\r\
+  \n                    (cum_work_min - previous_value) as em,\r\n               \
+  \     em * manpower as mm\r\n                FROM\r\n                    (\r\n \
+  \                       SELECT\r\n                            factory_date,\r\n\
+  \                            mp.module_id as module_id,\r\n                    \
+  \        ts,\r\n                            manpower,\r\n                      \
+  \      sas.schedule_id,\r\n                            cum_work_min\r\n        \
+  \                FROM\r\n                            (\r\n                     \
+  \           select\r\n                                    distinct factory_date,\r\
+  \n                                    module_id,\r\n                           \
+  \         ts,\r\n                                    manpower\r\n              \
+  \                  from\r\n                                    (\r\n           \
+  \                             select\r\n                                       \
+  \     factory_date,\r\n                                            module_id,\r\n\
+  \                                            formatDateTime(evt_gmt, '%R') as ts,\r\
+  \n                                            weighted_manpower as manpower\r\n\
+  \                                        from\r\n                              \
+  \              caat_manpower\r\n                                        where\r\n\
+  \                                            factory_id = {{ \"'\" + current_userfactoryId()\
+  \ + \"'\" }}\r\n                                            and module_id in [{{\
+  \ \"'\" + \"', '\".join(filter_values('module_id')) + \"'\" }}]\r\n            \
+  \                                and evt_gmt between '{{ from_dttm }}' and '{{ to_dttm\
+  \ }}'\r\n                                        union all\r\n                 \
+  \                       select\r\n\t\t\t                                       \
+  \ factory_date,\r\n\t\t\t                                        m.module_id as\
+  \ module_id,\r\n\t\t\t                                        if(factory_date =\
+  \ today(), substring({{nowTime()}}, 1, length({{nowTime()}}) - 3), max_time) as\
+  \ ts,\r\n\t\t\t                                        manpower\r\n\t\t\t      \
+  \                              from\r\n\t\t\t                                  \
+  \      (\r\n\t\t\t                                            select\r\n\t\t\t \
+  \                                               factory_date,\r\n\t\t\t        \
+  \                                        module_id,\r\n\t\t\t                  \
+  \                              argMax(weighted_manpower, evt_gmt) as manpower\r\n\
+  \t\t\t                                            from\r\n\t\t\t               \
+  \                                 caat_manpower\r\n\t\t\t                      \
+  \                      where\r\n\t\t\t                                         \
+  \       factory_id = {{ \"'\" + current_userfactoryId() + \"'\" }}\r\n\t\t\t   \
+  \                                             and toDateTime(factory_date) between\
+  \ '{{ from_dttm }}' and '{{ to_dttm }}'\r\n\t\t\t                              \
+  \                  and module_id in [{{ \"'\" + \"', '\".join(filter_values('module_id'))\
+  \ + \"'\" }}]\r\n\t\t\t                                            group by\r\n\t\
+  \t\t                                                factory_date,\r\n\t\t\t    \
+  \                                            module_id\r\n\t\t\t               \
+  \                         ) as m\r\n\t\t\t                                     \
+  \   left join (\r\n\t\t\t                                            select\r\n\t\
+  \t\t                                                date,\r\n\t\t\t            \
+  \                                    module_id,\r\n\t\t\t                      \
+  \                          max_time\r\n\t\t\t                                  \
+  \          from\r\n\t\t\t                                                comt_schedule_assignment_summary\
+  \ as a FINAL\r\n\t\t\t                                                left join\
+  \ (\r\n\t\t\t                                                    select\r\n\t\t\t\
+  \                                                        schedule_id,\r\n\t\t\t\
+  \                                                        argMax(time, item_index)\
+  \ as max_time\r\n\t\t\t                                                    from\r\
+  \n\t\t\t                                                        comt_schedule_item\
+  \ FINAL\r\n\t\t\t                                                    where\r\n\t\
+  \t\t                                                        factory_id = {{ \"'\"\
+  \ + current_userfactoryId() + \"'\" }}\r\n\t\t\t                               \
+  \                     group by\r\n\t\t\t                                       \
+  \                 schedule_id\r\n\t\t\t                                        \
+  \        ) as s on a .schedule_id = s.schedule_id\r\n\t\t\t                    \
+  \                        where\r\n\t\t\t                                       \
+  \         factory_id = {{ \"'\" + current_userfactoryId() + \"'\" }}\r\n\t\t\t \
+  \                                               and toDateTime(date) between '{{\
+  \ from_dttm }}' and '{{ to_dttm }}'\r\n\t\t\t                                  \
+  \              and module_id in [{{ \"'\" + \"', '\".join(filter_values('module_id'))\
+  \ + \"'\" }}]\r\n\t\t\t                                        ) as mt on m.factory_date\
+  \ = mt.date\r\n\t\t\t                                        and m.module_id = mt.module_id\r\
+  \n                                        union all\r\n                        \
+  \                select\r\n                                            a .factory_date\
+  \ as factory_date,\r\n                                            a .module_id as\
+  \ module_id,\r\n                                            sm.start_time as ts,\r\
+  \n                                            a .manpower as manpower\r\n      \
+  \                                  from\r\n                                    \
+  \        (\r\n                                                select\r\n       \
+  \                                             factory_date,\r\n                \
+  \                                    module_id,\r\n                            \
+  \                        argMin(weighted_manpower, evt_gmt) as manpower\r\n    \
+  \                                            from\r\n                          \
+  \                          caat_manpower\r\n                                   \
+  \             where\r\n                                                    factory_id\
+  \ = {{ \"'\" + current_userfactoryId() + \"'\" }}\r\n                          \
+  \                          and toDateTime(factory_date) between '{{ from_dttm }}'\
+  \ and '{{ to_dttm }}'\r\n                                                    and\
+  \ module_id in [{{ \"'\" + \"', '\".join(filter_values('module_id')) + \"'\" }}]\r\
+  \n                                                group by\r\n                 \
+  \                                   factory_date,\r\n                          \
+  \                          module_id\r\n                                       \
+  \     ) as a\r\n                                            LEFT JOIN (\r\n    \
+  \                                            select\r\n                        \
+  \                            *\r\n                                             \
+  \   from\r\n                                                    comt_schedule_assignment_summary\
+  \ final\r\n                                                where\r\n           \
+  \                                         factory_id = {{ \"'\" + current_userfactoryId()\
+  \ + \"'\" }}\r\n                                                    and module_id\
+  \ in [{{ \"'\" + \"', '\".join(filter_values('module_id')) + \"'\" }}]\r\n     \
+  \                                       ) as sas ON a .factory_date = sas.date\r\
+  \n                                            and a .module_id = sas.module_id\r\
+  \n                                            LEFT JOIN (\r\n                  \
+  \                              select\r\n                                      \
+  \              *\r\n                                                from\r\n   \
+  \                                                 comt_schedule_meta final\r\n \
+  \                                               where\r\n                      \
+  \                              factory_id = {{ \"'\" + current_userfactoryId() +\
+  \ \"'\" }}\r\n                                            ) as sm ON sas.schedule_id\
+  \ = sm.schedule_id\r\n                                    ) as data\r\n        \
+  \                        order by\r\n                                    factory_date,\r\
+  \n                                    module_id,\r\n                           \
+  \         ts\r\n                            ) as mp\r\n                        \
+  \    LEFT JOIN (\r\n                                select\r\n                 \
+  \                   *\r\n                                from\r\n              \
+  \                      comt_schedule_assignment_summary final\r\n              \
+  \                  where\r\n                                    factory_id = {{\
+  \ \"'\" + current_userfactoryId() + \"'\" }}\r\n                               \
+  \     and module_id in [{{ \"'\" + \"', '\".join(filter_values('module_id')) + \"\
+  '\" }}]\r\n                            ) as sas ON mp.factory_date = sas.date\r\n\
+  \                            and mp.module_id = sas.module_id\r\n              \
+  \              LEFT JOIN (\r\n                                select\r\n       \
+  \                             *\r\n                                from\r\n    \
+  \                                comt_schedule_item FINAL\r\n                  \
+  \              where\r\n                                    factory_id = {{ \"'\"\
+  \ + current_userfactoryId() + \"'\" }}\r\n                            ) as si ON\
+  \ sas.schedule_id = si.schedule_id\r\n                            and mp.ts = si.time\r\
+  \n                        ORDER BY item_index\r\n                    )\r\n     \
+  \       )\r\n        GROUP BY\r\n            module_id\r\n    ) AS mm ON mm.module_id\
+  \ = o.module_id\r\n    LEFT JOIN (\r\n        SELECT\r\n            module_id,\r\
+  \n            sum(plan_manmins) AS plan_manmins\r\n        FROM\r\n            (\r\
+  \n                SELECT\r\n                    date,\r\n                    module_id,\r\
+  \n                    CASE\r\n                        WHEN plan_type = '2' THEN\
+  \ max(mins)\r\n                        ELSE sum(mins)\r\n                    END\
+  \ AS plan_mins,\r\n                    avg(operator) AS plan_operator,\r\n     \
+  \               avg(helper) AS plan_helper,\r\n                    avg(ironman)\
+  \ AS plan_ironman,\r\n                    avg(qc) AS plan_qc,\r\n              \
+  \      avg(manpower) AS plan_manpower,\r\n                    avg(weighted_manpower)\
+  \ AS weighted_manpower,\r\n                    plan_mins AS plan_minutes,\r\n  \
+  \                  ((plan_mins * weighted_manpower) / 60) AS plan_manhours,\r\n\
+  \                    (plan_mins * weighted_manpower) AS plan_manmins\r\n       \
+  \         FROM\r\n                    (\r\n                        SELECT\r\n  \
+  \                          *\r\n                        FROM\r\n               \
+  \             comt_production_plan_v2 FINAL\r\n                        WHERE\r\n\
+  \                            factory_id = {{ \"'\" + current_userfactoryId() + \"\
+  '\" }}\r\n                            AND module_id in [{{ \"'\" + \"', '\".join(filter_values('module_id'))\
+  \ + \"'\" }}]\r\n                            AND toDateTime(date) between '{{ from_dttm\
+  \ }}' and '{{ to_dttm }}'\r\n                    )\r\n                GROUP BY\r\
+  \n                    date,\r\n                    plan_type,\r\n              \
+  \      module_id\r\n            )\r\n        GROUP BY \r\n            module_id\r\
+  \n    ) AS p ON mm.module_id = p.module_id\r\nORDER BY \r\n    o.module_id"
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+uuid: 4e4d2a35-bce4-4a7d-8c83-fca1f40a303c
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra:
+    warning_markdown: ''
+  warning_text: null
+columns:
+- column_name: o.department_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.tenant_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.building_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.section_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.cluster_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.zone_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.floor_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.unit_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.department
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.tenant
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.building
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.section
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.cluster
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.zone
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.floor
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.unit
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Nullable(String)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.factory_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.module_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.factory
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: o.module
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: plan_manhours
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Float64
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: manhours
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: Float64
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+version: 1.0.0
+database_uuid: b8c55260-93fb-406b-b1da-eacc21b92a52
