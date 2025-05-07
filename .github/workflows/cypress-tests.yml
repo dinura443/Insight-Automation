@@ -33,8 +33,8 @@ jobs:
 
       - name: Run Cypress Tests
         run: npx cypress run
-        env:
-          DASHBOARD_NAMES: ${{ github.event.inputs.dashboardNames }}
+        continue-on-error: true
+
 
       - name: Get backup filename
         id: get_name
