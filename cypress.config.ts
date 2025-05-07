@@ -37,7 +37,9 @@ export default defineConfig({
     backupDir: process.env.BACKUP,
     rootDir : process.env.ROOT_DIR,
     archiveInstance1: process.env.ARCHIVEINSTANCE1,
-    backupStatusDir: process.env.BACKUPSTATUSDIR
+    backupStatusDir: process.env.BACKUPSTATUSDIR,
+    DASHBOARD_NAMES: process.env.DASHBOARD_NAMES, 
+
 
   },
   e2e: {

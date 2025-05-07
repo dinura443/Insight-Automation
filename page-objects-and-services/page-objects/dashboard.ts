@@ -13,8 +13,11 @@ export class DashBoard {
   deleteBtn="(//span[@aria-label='trash'])[1]";
   deleteTxtBox="(//input[@id='delete'])[1]";
   deleteConfirmBtn="(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-dangerous antd5-btn-color-dangerous antd5-btn-variant-solid superset-button superset-button-danger cta css-1pe2gaq'])[1]";
-
+  bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
   importbutton = "//span[normalize-space()='Import']";
+  exportButton ="//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
+
+
 
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
@@ -24,8 +27,46 @@ export class DashBoard {
   
     cy.wait(10000);
   }
+
+  bulkExportDashboards(dashboardNames: string[]): void {
+    cy.log(`Starting bulk export for ${dashboardNames.length} dashboards`);
+
+    // Step 1: Click the Bulk Select button
+    cy.xpath(this.bulkSelectBtn)
+      .should("be.visible")
+      .click({ force: true });
+    cy.wait(1000); // Small delay for checkboxes to appear
+
+    // Step 2: Loop through each dashboard name and check the box
+    dashboardNames.forEach((name, index) => {
+      cy.contains(this.itemNameSelector, name).then(($row) => {
+        const row = Cypress.$($row).closest("tr");
+        const checkboxId = index.toString();
+        const checkboxXPath = `//input[@id='${checkboxId}']`;
+
+        cy.wrap(row).within(() => {
+          cy.xpath(checkboxXPath)
+            .check({ force: true })
+            .log(`Checked dashboard: "${name}"`);
+        });
+      });
+    });
+
+    // Step 3: Click the Export button
+    cy.xpath(this.exportButton)
+      .should("be.visible")
+      .click({ force: true });
+    cy.log("Clicked Export button");
+
+    // Step 4: Wait for download to start
+    cy.wait(3000); // Replace this with proper wait logic if possible
+
+    cy.log("Bulk export completed successfully.");
+  }
+
   
-  
+
+
 
 
   findRowByItemName(itemName: string) {
