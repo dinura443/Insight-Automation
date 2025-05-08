@@ -20,14 +20,12 @@ describe("Verification Process", () => {
     });
 
     cy.task("verifySupersetFiles", {
-      extractedFilesDir: instance1DashboardDir,
-      importVerifyDir: instance2DashboardDir,
+      extractedFilesDir: Cypress.env("FILECOMPONENTS_INSTANCE1"),
+      importVerifyDir: Cypress.env("FILECOMPONENTS_INSTANCE2"),
     }).then((result) => {
       if (!result.success) {
         cy.task("log", "YAML verification failed. Summary:", result.summary);
-        result.summary.differences.forEach((diff) => {
-          cy.task("log", diff);
-        });
+  
       }
       expect(result.success, "YAML verification passed").to.be.true;
     });

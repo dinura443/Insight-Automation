@@ -26,7 +26,9 @@ export default defineConfig({
   env: {
     username: process.env.USERNAME,
     password: process.env.PASSWORD,
-    dashboard: process.env.DASHBOARD_NAME,
+    dashboard: process.env.ITEM_NAMES,
+    chart: process.env.ITEM_NAMES,
+    dataset: process.env.ITEM_NAMES,
     downloadDir: process.env.DOWNLOAD_DIR,
     ARCHIVE_INSTANCE1: process.env.ARCHIVE_INSTANCE1,
     ARCHIVE_INSTANCE2: process.env.ARCHIVE_INSTANCE2,
@@ -38,8 +40,8 @@ export default defineConfig({
     backupDir: process.env.BACKUP,
     rootDir : process.env.ROOT_DIR,
     backupStatusDir: process.env.BACKUPSTATUSDIR,
-    DASHBOARD_NAMES: process.env.DASHBOARD_NAMES, 
-    CHART_NAMES: process.env.CHART_NAMES,
+    DASHBOARD_NAMES: process.env.ITEM_NAMES, 
+    CHART_NAMES: process.env.ITEM_NAMES,
 
 
   },

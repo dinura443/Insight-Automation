@@ -1,22 +1,21 @@
 export class chart{
 
-    chartPagebtn = "'//a[normalize-space()='Charts']'";
-    bulkselectionbtn = "(//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd'])[1]";
+    chartPagebtn = "(//a[normalize-space()='Charts'])[1]";
+    bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
     exportButton = "//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
 
 
     visitChartPage() {
         cy.log("Navigating to the chart page...");
         cy.xpath(this.chartPagebtn)
-          .should('exist')
-          .and('be.visible')
           .click();
-      }
+          cy.wait(10000);
+        }
 
 
     clickBulkSelectBtn() {
         cy.log("Clicking the 'Bulk Select' button...");
-        cy.xpath(this.bulkselectionbtn)
+        cy.xpath(this.bulkSelectBtn)
           .should('exist')
           .and('be.visible')
           .click();
@@ -27,11 +26,9 @@ export class chart{
     bulkExportChart(chartNames: string[]): void {
         cy.log(`Starting bulk export for ${chartNames.length} Charts`);
     
-        // Step 1: Click "Bulk Select" button
-        cy.xpath(this.bulkselectionbtn).click({ force: true });
-        cy.wait(5000); // Small delay to ensure checkboxes are visible
+        cy.xpath(this.bulkSelectBtn).click({ force: true });
+        cy.wait(5000); 
     
-        // Step 2: Get all dashboard names in order from the DOM
         const foundChartNames: string[] = [];
     
         cy.get("td a").each(($el) => {
@@ -40,11 +37,9 @@ export class chart{
             foundChartNames.push(name);
           }
         }).then(() => {
-          // Log full list for debugging
-          cy.log("Found Dashboard List:", JSON.stringify(foundChartNames));
+          cy.log("Found Chart List:", JSON.stringify(foundChartNames));
     
-          // Step 3: Map desired names to their indices
-          const indicesToCheck = foundChartNames
+          const indicesToCheck = chartNames
             .map((name) => {
               const index = foundChartNames.indexOf(name);
               if (index === -1) {
@@ -56,7 +51,7 @@ export class chart{
             .filter((index) => index !== null);
     
           if (indicesToCheck.length === 0) {
-            throw new Error("No valid dashboard names found to export.");
+            throw new Error("No valid chart names found to export.");
           }
     
           indicesToCheck.forEach((index) => {
@@ -64,17 +59,18 @@ export class chart{
             cy.xpath(checkboxXPath)
               .should("exist")
               .check({ force: true })
-              .log(`Checked dashboard at index ${index}: "${foundChartNames[index]}"`);
-              cy.wait(1000); // Small delay to ensure checkbox is checked
+              .log(`Checked chart at index ${index}: "${foundChartNames[index]}"`);
+              cy.wait(1000); 
           });
+
+          
     
-          // Step 5: Click Export button
           cy.xpath(this.exportButton)
             .should("be.visible")
             .click({ force: true });
     
-          cy.log("✔️ Bulk export completed successfully.");
-          cy.wait(5000); // Wait for the export to complete
+          cy.log(" Bulk export completed successfully.");
+          cy.wait(5000); 
         });
       }
     

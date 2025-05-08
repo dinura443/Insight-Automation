@@ -18,6 +18,7 @@ export class DashBoard {
   exportButton ="//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
    overwriteInputSelector = "#overwrite";
    overwriteButtonSelector = 'button:contains("Overwrite")';
+  gridViewbtn = "(//div[@class='toggle-button active'])[1]";
 
 
 
@@ -37,6 +38,16 @@ export class DashBoard {
       .click();
   
     cy.wait(10000);
+  }
+
+  clickGridViewButton() {
+    cy.log("Clicking the 'Grid View' button...");
+    cy.xpath(this.gridViewbtn)
+      .should('exist')
+      .and('be.visible')
+      .click();
+    cy.log("Grid view button clicked.");
+    cy.wait(5000);
   }
 
    confirmOverwrite() {

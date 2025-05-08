@@ -1,15 +1,23 @@
 import { chart } from "../../page-objects-and-services/page-objects/chart-Obects";
-import { login } from "../../page-objects-and-services/page-objects/login-Objects";
-
+import { LoginPage } from "../../page-objects-and-services/page-objects/Login";
 const chartPage = new chart();
-const login = new login();
+const login = new LoginPage();
 
-chartPage.visitChartPage();
 
 
 describe("Chart Operations", () => {
 
-    it("", () => {
+    let chartNames = [];
+
+    before(() => {
+      const envList = Cypress.env("CHART_NAMES");
+      if (!envList || typeof envList !== "string") {
+        throw new Error("No dashboard names provided. Set ITEM_NAMES env var.");
+      }
+      chartNames = envList.split(",").map((name) => name.trim());
+    });
+
+    it("e", () => {
 
         cy.log("Logging in...");
         login.visitInstance1();
@@ -19,9 +27,9 @@ describe("Chart Operations", () => {
         cy.wait(2000);
 
         chartPage.visitChartPage();
-        cy.wait(2000);
+        cy.wait(5000);
 
-        chartPage.bulkExportChart();
+        chartPage.bulkExportChart(chartNames);
 
 
 
