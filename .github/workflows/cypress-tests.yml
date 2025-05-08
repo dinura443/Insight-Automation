@@ -55,7 +55,7 @@ jobs:
       - name: Get backup filename
         id: get_name
         run: |
-          BACKUP_NAME=$(ls cypress/fixtures/backups | grep .zip | sort | tail -n 1)
+          BACKUP_NAME=$(ls cypress/fixtures/backups/pre-import | grep .zip | sort | tail -n 1)
           echo "Latest backup: $BACKUP_NAME"
           echo "BACKUP_NAME=$BACKUP_NAME" >> $GITHUB_ENV
 
@@ -64,7 +64,7 @@ jobs:
           echo "Uploading ${{ env.BACKUP_NAME }} to server..."
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
-            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/cypress-backups/backups/
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/cypress-backups/backups
 
       - name: Remove files older than 24 hours on server
         run: |
