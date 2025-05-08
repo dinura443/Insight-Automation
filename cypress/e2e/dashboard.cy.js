@@ -38,7 +38,7 @@ describe("File Operations", () => {
   
       dashboard.bulkExportDashboards(dashboardNames);
   
-      cy.wait(3000); 
+      cy.wait(5000); 
   
       cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
         if (!latestFilePath) {

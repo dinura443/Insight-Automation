@@ -57,7 +57,7 @@ export class DashBoard {
 
     // Step 1: Click "Bulk Select" button
     cy.xpath(this.bulkSelectBtn).click({ force: true });
-    cy.wait(1000); // Small delay to ensure checkboxes are visible
+    cy.wait(5000); // Small delay to ensure checkboxes are visible
 
     // Step 2: Get all dashboard names in order from the DOM
     const foundDashboardNames: string[] = [];
@@ -94,6 +94,7 @@ export class DashBoard {
           .should("exist")
           .check({ force: true })
           .log(`Checked dashboard at index ${index}: "${foundDashboardNames[index]}"`);
+          cy.wait(1000); // Small delay to ensure checkbox is checked
       });
 
       // Step 5: Click Export button
@@ -102,6 +103,7 @@ export class DashBoard {
         .click({ force: true });
 
       cy.log("✔️ Bulk export completed successfully.");
+      cy.wait(5000); // Wait for the export to complete
     });
   }
 
