@@ -8,13 +8,10 @@ export class VerifyExporter {
   private importBase: string;
 
   constructor(extractedBase: string, importBase: string) {
-    this.extractedBase = extractedBase; 
-    this.importBase = importBase; 
+    this.extractedBase = extractedBase;
+    this.importBase = importBase;
   }
 
-
-
-  
   private getLatestSubDir(baseDir: string): string | null {
     const dirs = fs.readdirSync(baseDir)
       .map(name => path.join(baseDir, name))
@@ -26,13 +23,11 @@ export class VerifyExporter {
     return dirs[0];
   }
 
-
   private getAllYamlFiles(dir: string, base = dir): string[] {
     const files: string[] = [];
     fs.readdirSync(dir).forEach(file => {
       const fullPath = path.join(dir, file);
       const stat = fs.statSync(fullPath);
-
 
       if (stat.isDirectory()) {
         files.push(...this.getAllYamlFiles(fullPath, base));
@@ -50,8 +45,8 @@ export class VerifyExporter {
 
   private findDifferences(obj1: any, obj2: any, currentPath: string = ""): string[] {
     const differences: string[] = [];
-
     const allKeys = new Set([...Object.keys(obj1 || {}), ...Object.keys(obj2 || {})]);
+
     allKeys.forEach(key => {
       if (key === "sqlalchemy_uri") return;
 
@@ -86,7 +81,7 @@ export class VerifyExporter {
     const files1 = this.getAllYamlFiles(latestExtracted);
     const files2 = this.getAllYamlFiles(latestImported);
 
-      const filterDashboards = (files: string[]) =>
+    const filterDashboards = (files: string[]) =>
       files.filter(file => !file.startsWith("dashboards/"));
 
     const filteredFiles1 = filterDashboards(files1);
@@ -94,7 +89,6 @@ export class VerifyExporter {
 
     const missingInDir2 = filteredFiles1.filter(f => !filteredFiles2.includes(f));
     const extraInDir2 = filteredFiles2.filter(f => !filteredFiles1.includes(f));
-    
 
     console.log("Comparing folder structures...");
     if (missingInDir2.length || extraInDir2.length) {

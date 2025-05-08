@@ -13,11 +13,7 @@ interface ChartData {
   alignment: string;
 }
 
-
-
-
 export default defineConfig({
-
   chromeWebSecurity: false,
   retries: {
     runMode: 0,
@@ -38,16 +34,14 @@ export default defineConfig({
     instance2Login: process.env.INSTANCE2_LOGIN,
     dashboardUi: process.env.DASHBOARD_UI,
     backupDir: process.env.BACKUP,
-    rootDir : process.env.ROOT_DIR,
+    rootDir: process.env.ROOT_DIR,
     backupStatusDir: process.env.BACKUPSTATUSDIR,
-    DASHBOARD_NAMES: process.env.ITEM_NAMES, 
+    DASHBOARD_NAMES: process.env.ITEM_NAMES,
     CHART_NAMES: process.env.ITEM_NAMES,
-
-
   },
   e2e: {
-    video: true, 
-    screenshotOnRunFailure: true, 
+    video: true,
+    screenshotOnRunFailure: true,
     fixturesFolder: "cypress/fixtures",
     downloadsFolder: "cypress/downloads",
     defaultCommandTimeout: 3000,
@@ -55,25 +49,17 @@ export default defineConfig({
       require("@cypress/grep/src/plugin")(config);
       require("cypress-terminal-report/src/installLogsPrinter")(on);
 
-
-
-
-
-      on('task', {
+      on("task", {
         fileExists(filePath: string) {
           return fs.existsSync(filePath);
         },
       });
 
-
-
-     
       on("task", {
         compareJsonFiles({ file1, file2 }) {
           try {
             const filePath1 = path.resolve(file1);
             const filePath2 = path.resolve(file2);
-
             const data1: ChartData[] = JSON.parse(fs.readFileSync(filePath1, "utf8"));
             const data2: ChartData[] = JSON.parse(fs.readFileSync(filePath2, "utf8"));
 
@@ -133,18 +119,15 @@ export default defineConfig({
         },
       });
 
-
-
-
       on("task", {
         isDirectoryEmpty(directoryPath: string): boolean {
           try {
             if (!fs.existsSync(directoryPath)) {
               throw new Error(`Directory does not exist: ${directoryPath}`);
             }
-      
+
             const files = fs.readdirSync(directoryPath);
-            return files.length === 0; 
+            return files.length === 0;
           } catch (error) {
             throw new Error(`Error checking directory: ${(error as Error).message}`);
           }
@@ -158,13 +141,11 @@ export default defineConfig({
               return `File does not exist: ${targetPath}`;
             }
 
-            // Ensure the target is a file (not a directory)
             const stat = fs.statSync(targetPath);
             if (stat.isDirectory()) {
               return `Path is a directory, not a file: ${targetPath}`;
             }
 
-            // Delete the file
             fs.unlinkSync(targetPath);
             return `Deleted file: ${targetPath}`;
           } catch (error) {
@@ -172,7 +153,7 @@ export default defineConfig({
           }
         },
       });
-      // Task: Verify folders exist
+
       on("task", {
         verifyFoldersExist({ baseDir, folderNames }) {
           try {
@@ -201,7 +182,7 @@ export default defineConfig({
             if (!fs.existsSync(destDir)) {
               fs.mkdirSync(destDir, { recursive: true });
             }
-            fs.copyFileSync(source, destination); 
+            fs.copyFileSync(source, destination);
             return `File copied successfully from ${source} to ${destination}`;
           } catch (error) {
             const errorMessage = (error as Error).message;
@@ -259,7 +240,6 @@ export default defineConfig({
           } catch (error) {
             const errorMessage = (error as Error).message;
             return `Error unzipping file: ${errorMessage}`;
-            
           }
         },
       });
@@ -295,7 +275,6 @@ export default defineConfig({
         },
       });
 
-
       on("task", {
         clearDirectoryContents(directoryPath: string) {
           try {
@@ -303,30 +282,28 @@ export default defineConfig({
               console.log(`Directory does not exist: ${directoryPath}`);
               return `Directory does not exist: ${directoryPath}`;
             }
-      
+
             const files = fs.readdirSync(directoryPath);
-      
+
             files.forEach((file) => {
               const filePath = path.join(directoryPath, file);
               const stat = fs.statSync(filePath);
-      
+
               if (stat.isDirectory()) {
                 console.log(`Deleting subdirectory: ${filePath}`);
-                fs.rmSync(filePath, { recursive: true, force: true }); 
+                fs.rmSync(filePath, { recursive: true, force: true });
               } else {
                 console.log(`Deleting file: ${filePath}`);
-                fs.unlinkSync(filePath); 
+                fs.unlinkSync(filePath);
               }
             });
-      
+
             return `Cleared contents of directory: ${directoryPath}`;
           } catch (error) {
             return `Error clearing directory contents: ${(error as Error).message}`;
           }
         },
       });
-
-
 
       on("task", {
         verifyUiContents({ dashboardUi, itemName }) {
@@ -341,7 +318,7 @@ export default defineConfig({
           try {
             const dir = path.dirname(filename);
             if (!fs.existsSync(dir)) {
-              fs.mkdirSync(dir, { recursive: true }); 
+              fs.mkdirSync(dir, { recursive: true });
             }
             fs.writeFileSync(filename, JSON.stringify(data, null, 2), "utf8");
             return `File written successfully: ${filename}`;
@@ -353,9 +330,9 @@ export default defineConfig({
 
       on("task", {
         readJsonFile({ filename }) {
-          const filePath = path.join(__dirname, '..', '..', 'fixtures', 'data', filename);
+          const filePath = path.join(__dirname, "..", "..", "fixtures", "data", filename);
           if (fs.existsSync(filePath)) {
-            return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            return JSON.parse(fs.readFileSync(filePath, "utf8"));
           } else {
             return null;
           }
@@ -366,3 +343,6 @@ export default defineConfig({
     },
   },
 });
+
+
+

@@ -1,42 +1,34 @@
-
-
 export class DashBoard {
   instance1Dashboard = Cypress.env("instance1Dashboard");
   instance2Dashboard = Cypress.env("instance2Dashboard");
-  tableRowSelector = 'tr[role="row"]'; 
+  tableRowSelector = 'tr[role="row"]';
   itemNameSelector = "td a";
   shareButtonSelector = 'span[aria-label="share"]';
   importButtonSelector = 'button > span[aria-label="import"]';
   selectFileInputSelector = "#modelFile";
   importDialogImportButtonSelector = 'button[type="submit"][data-title="Import"]';
-  dashboardbtn="//a[normalize-space()='Dashboards']";
-  deleteBtn="(//span[@aria-label='trash'])[1]";
-  deleteTxtBox="(//input[@id='delete'])[1]";
-  deleteConfirmBtn="(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-dangerous antd5-btn-color-dangerous antd5-btn-variant-solid superset-button superset-button-danger cta css-1pe2gaq'])[1]";
+  dashboardbtn = "//a[normalize-space()='Dashboards']";
+  deleteBtn = "(//span[@aria-label='trash'])[1]";
+  deleteTxtBox = "(//input[@id='delete'])[1]";
+  deleteConfirmBtn = "(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-dangerous antd5-btn-color-dangerous antd5-btn-variant-solid superset-button superset-button-danger cta css-1pe2gaq'])[1]";
   bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
   importbutton = "//span[normalize-space()='Import']";
-  exportButton ="//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
-   overwriteInputSelector = "#overwrite";
-   overwriteButtonSelector = 'button:contains("Overwrite")';
+  exportButton = "//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
+  overwriteInputSelector = "#overwrite";
+  overwriteButtonSelector = 'button:contains("Overwrite")';
   gridViewbtn = "(//div[@class='toggle-button active'])[1]";
 
-
-
-
-  
-   clickBulkSelectButton() {
+  clickBulkSelectButton() {
     cy.log("Clicking the 'Bulk Select' button...");
     cy.xpath(this.bulkSelectBtn)
       .should('exist')
       .and('be.visible')
       .click();
-   }
+  }
+
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
-  
-    cy.xpath(this.dashboardbtn)
-      .click();
-  
+    cy.xpath(this.dashboardbtn).click();
     cy.wait(10000);
   }
 
@@ -50,13 +42,11 @@ export class DashBoard {
     cy.wait(5000);
   }
 
-   confirmOverwrite() {
-
+  confirmOverwrite() {
     cy.get(this.overwriteInputSelector)
       .should('be.visible')
       .clear()
       .type('OVERWRITE');
-  
     cy.get(this.overwriteButtonSelector)
       .should('exist')
       .and('be.visible')
@@ -66,63 +56,52 @@ export class DashBoard {
   bulkExportDashboards(dashboardNames: string[]): void {
     cy.log(`Starting bulk export for ${dashboardNames.length} dashboards`);
 
-    // Step 1: Click "Bulk Select" button
     cy.xpath(this.bulkSelectBtn).click({ force: true });
-    cy.wait(5000); // Small delay to ensure checkboxes are visible
-
-    // Step 2: Get all dashboard names in order from the DOM
+    cy.wait(5000);
     const foundDashboardNames: string[] = [];
 
-    cy.get("td a").each(($el) => {
-      const name = $el.text().trim();
-      if (name !== "") {
-        foundDashboardNames.push(name);
-      }
-    }).then(() => {
-      // Log full list for debugging
-      cy.log("Found Dashboard List:", JSON.stringify(foundDashboardNames));
+    cy.get("td a")
+      .each(($el) => {
+        const name = $el.text().trim();
+        if (name !== "") {
+          foundDashboardNames.push(name);
+        }
+      })
+      .then(() => {
+        cy.log("Found Dashboard List:", JSON.stringify(foundDashboardNames));
 
-      // Step 3: Map desired names to their indices
-      const indicesToCheck = dashboardNames
-        .map((name) => {
-          const index = foundDashboardNames.indexOf(name);
-          if (index === -1) {
-            cy.log(`Dashboard "${name}" not found in list.`);
-            return null;
-          }
-          return index;
-        })
-        .filter((index) => index !== null);
+        const indicesToCheck = dashboardNames
+          .map((name) => {
+            const index = foundDashboardNames.indexOf(name);
+            if (index === -1) {
+              cy.log(`Dashboard "${name}" not found in list.`);
+              return null;
+            }
+            return index;
+          })
+          .filter((index) => index !== null);
 
-      if (indicesToCheck.length === 0) {
-        throw new Error("No valid dashboard names found to export.");
-      }
+        if (indicesToCheck.length === 0) {
+          throw new Error("No valid dashboard names found to export.");
+        }
 
-      // Step 4: Loop through indices and check checkboxes
-      indicesToCheck.forEach((index) => {
-        const checkboxXPath = `(//input[@id='${index}'])[1]`;
-        cy.xpath(checkboxXPath)
-          .should("exist")
-          .check({ force: true })
-          .log(`Checked dashboard at index ${index}: "${foundDashboardNames[index]}"`);
-          cy.wait(1000); // Small delay to ensure checkbox is checked
+        indicesToCheck.forEach((index) => {
+          const checkboxXPath = `(//input[@id='${index}'])[1]`;
+          cy.xpath(checkboxXPath)
+            .should("exist")
+            .check({ force: true })
+            .log(`Checked dashboard at index ${index}: "${foundDashboardNames[index]}"`);
+          cy.wait(1000); 
+        });
+
+        cy.xpath(this.exportButton)
+          .should("be.visible")
+          .click({ force: true });
+
+        cy.log("✔️ Bulk export completed successfully.");
+        cy.wait(5000); // Wait for the export to complete
       });
-
-      // Step 5: Click Export button
-      cy.xpath(this.exportButton)
-        .should("be.visible")
-        .click({ force: true });
-
-      cy.log("✔️ Bulk export completed successfully.");
-      cy.wait(5000); // Wait for the export to complete
-    });
   }
-
-
-  
-
-
-
 
   findRowByItemName(itemName: string) {
     cy.log(`Searching for item name: "${itemName}"`);
@@ -158,72 +137,58 @@ export class DashBoard {
   }
 
   analyzeDashboardlist(dashboard: string) {
-    cy.get('body').then($body => {
-
+    cy.get('body').then(($body) => {
       const matchingRow = $body.find(`tr:contains("${dashboard}")`);
-  
+
       if (matchingRow.length > 0) {
         cy.log(`${dashboard} exists in the dashboard list.`);
         this.deleteDashboard(dashboard);
       } else {
         cy.log(`${dashboard} does NOT exist in the dashboard list.`);
-        // Optional: handle non-existence
       }
     });
   }
 
-
-
-  
-
   typeInputAndPressEnter(text: string): void {
-    cy.get('.ant-input-affix-wrapper.css-1ij993o',{ timeout: 10000 }) 
-      .find('input') 
-      .should('be.visible') 
-      .type(`${text}{enter}`); 
+    cy.get('.ant-input-affix-wrapper.css-1ij993o', { timeout: 10000 })
+      .find('input')
+      .should('be.visible')
+      .type(`${text}{enter}`);
   }
 
+  deleteDashboard(itemName: string) {
+    this.findRowByItemName(itemName)
+      .should("exist")
+      .within(() => {
+        cy.xpath(this.deleteBtn, { timeout: 2000 })
+          .should('exist')
+          .click();
+        cy.log('Clicked the "Delete" button.');
 
+        cy.xpath(this.deleteTxtBox, { timeout: 2000 })
+          .should('exist')
+          .and('be.visible')
+          .type('DELETE')
+          .then(() => {
+            cy.log('Typed "DELETE" into the input field.');
+          });
 
-
-deleteDashboard(itemName: string) {
-
-
-  this.findRowByItemName(itemName)
-  .should("exist")
-  .within(() => {
-
-    cy.xpath(this.deleteBtn, { timeout: 2000 })
-    .should('exist')
-    .click();
-    cy.log('Clicked the "Delete" button.');
-  
-    cy.xpath(this.deleteTxtBox, { timeout: 2000 }) 
-    .should('exist')
-    .and('be.visible')
-    .type('DELETE') 
-    .then(() => {
-      cy.log('Typed "DELETE" into the input field.');
-    });
-  
-    cy.xpath(this.deleteConfirmBtn, { timeout: 2000 })
-    .should('exist')
-    .and('be.visible')
-    .click();
-    cy.log('Clicked the "Confirm" button.');
-
-  });
-
-}
+        cy.xpath(this.deleteConfirmBtn, { timeout: 2000 })
+          .should('exist')
+          .and('be.visible')
+          .click();
+        cy.log('Clicked the "Confirm" button.');
+      });
+  }
 
   getDashboardCharts(itemName: string) {
     const scrapedCharts: any[] = [];
 
-    return cy.get('.chart-slice[data-test-chart-id]').then($charts => {
+    return cy.get('.chart-slice[data-test-chart-id]').then(($charts) => {
       const chartCount = $charts.length;
       cy.log(`Total number of charts detected: ${chartCount}`);
 
-      $charts.each((index : number, chartEl: HTMLElement) => {
+      $charts.each((index: number, chartEl: HTMLElement) => {
         const $chart = Cypress.$(chartEl);
 
         const chartId = $chart.attr('data-test-chart-id');
@@ -264,7 +229,7 @@ deleteDashboard(itemName: string) {
       });
 
       cy.log(`Scraping complete: Found ${chartCount} charts for dashboard "${itemName}"`);
-      return cy.wrap(scrapedCharts); 
+      return cy.wrap(scrapedCharts);
     });
   }
 

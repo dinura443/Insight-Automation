@@ -1,5 +1,4 @@
 describe("Verification Process", () => {
-
   it("Performing the file verification", () => {
     const instance1DashboardDir = Cypress.env("FILECOMPONENTS_INSTANCE1");
     const instance2DashboardDir = Cypress.env("FILECOMPONENTS_INSTANCE2");
@@ -25,7 +24,6 @@ describe("Verification Process", () => {
     }).then((result) => {
       if (!result.success) {
         cy.task("log", "YAML verification failed. Summary:", result.summary);
-  
       }
       expect(result.success, "YAML verification passed").to.be.true;
     });
@@ -53,11 +51,10 @@ describe("Verification Process", () => {
       expect(result.success, "UI verification passed").to.be.true;
     });
   });
-}); 
+});
 
 
 describe("Verification Process", () => {
-
   it("End-to-End Clean Up", () => {
     const instance2Archive = Cypress.env("ARCHIVE_INSTANCE2");
     const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
@@ -65,7 +62,6 @@ describe("Verification Process", () => {
     const instance1Dir = Cypress.env("FILECOMPONENTS_INSTANCE1");
     const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2");
     const backupStatusDir = Cypress.env("backupStatusDir");
-
 
     cy.log("Clearing contents of downloads directory...");
     cy.task("clearDirectoryContents", dashboardUi).then((result) => {
@@ -92,17 +88,11 @@ describe("Verification Process", () => {
       cy.log(result);
     });
 
-
     cy.log("Clearing the rest of the temp directories...");
     cy.task("deleteFile", backupStatusDir).then((result) => {
       cy.log(result);
     });
-
   });
-
-
-
-
 });
 
 
