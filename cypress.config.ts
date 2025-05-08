@@ -2,8 +2,8 @@ import { defineConfig } from "cypress";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
-import { VerifyExporter } from "./page-objects-and-services/page-objects/file-Verification";
-import { UiVerifier } from "./page-objects-and-services/page-objects/ui-Verification";
+import { VerifyExporter } from "./page-objects-and-services/page-objects/dashboard-File-Verification";
+import { UiVerifier } from "./page-objects-and-services/page-objects/dashboard-Ui-Verification";
 
 dotenv.config();
 
@@ -28,17 +28,18 @@ export default defineConfig({
     password: process.env.PASSWORD,
     dashboard: process.env.DASHBOARD_NAME,
     downloadDir: process.env.DOWNLOAD_DIR,
-    archiveInstance2: process.env.ARCHIVEINSTANCE2,
-    instance1DashboardDir: process.env.DASHBOARD_INSTANCE1,
-    instance2DashboardDir: process.env.DASHBOARD_INSTANCE2,
+    ARCHIVE_INSTANCE1: process.env.ARCHIVE_INSTANCE1,
+    ARCHIVE_INSTANCE2: process.env.ARCHIVE_INSTANCE2,
+    FILECOMPONENTS_INSTANCE1: process.env.FILECOMPONENTS_INSTANCE1,
+    FILECOMPONENTS_INSTANCE2: process.env.FILECOMPONENTS_INSTANCE2,
     instance1Login: process.env.INSTANCE1_LOGIN,
     instance2Login: process.env.INSTANCE2_LOGIN,
     dashboardUi: process.env.DASHBOARD_UI,
     backupDir: process.env.BACKUP,
     rootDir : process.env.ROOT_DIR,
-    archiveInstance1: process.env.ARCHIVEINSTANCE1,
     backupStatusDir: process.env.BACKUPSTATUSDIR,
     DASHBOARD_NAMES: process.env.DASHBOARD_NAMES, 
+    CHART_NAMES: process.env.CHART_NAMES,
 
 
   },

@@ -1,5 +1,5 @@
 import { LoginPage } from "../../page-objects-and-services/page-objects/Login";
-import { DashBoard } from "../../page-objects-and-services/page-objects/dashboard";
+import { DashBoard } from "../../page-objects-and-services/page-objects/dashboard-Objects";
 
 const login = new LoginPage();
 const dashboard = new DashBoard();
@@ -10,8 +10,8 @@ const dashboard = new DashBoard();
 
 describe("File Operations", () => {
     const downloadDirectory = Cypress.env("downloadDir");
-    const targetDirectory = Cypress.env("instance1DashboardDir");
-    const desiredDownloadPath = "instance1Archive";
+    const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
+    const desiredDownloadPath = "ARCHIVE_INSTANCE1";
     const extractDir = targetDirectory;
   
     let dashboardNames = [];
@@ -132,8 +132,8 @@ describe("File Operations", () => {
   });
 
 describe("File Operations", () => {
-    const dashboardInstance1Archive = Cypress.env("archiveInstance1");
-    const desiredDownloadPath = "instance1Archive";
+    const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
+    const desiredDownloadPath = "ARCHIVE_INSTANCE1";
     const statusFile = "cypress/fixtures/test-status.json";
     const backupDir = "cypress/fixtures/backups/pre-import";
   
@@ -305,8 +305,8 @@ describe("File Operations", () => {
   
 describe("File Operations", () => {
     const downloadDirectory = Cypress.env("downloadDir");
-    const targetDirectory = Cypress.env("instance2DashboardDir");
-    const desiredDownloadPath = "instance2Archive";
+    const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE2");
+    const desiredDownloadPath = "ARCHIVE_INSTANCE2";
     const extractDir = targetDirectory;
   
     let dashboardNames = [];
