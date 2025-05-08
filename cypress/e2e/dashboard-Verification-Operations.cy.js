@@ -19,8 +19,8 @@ describe("Verification Process", () => {
     });
 
     cy.task("verifySupersetFiles", {
-      extractedFilesDir: Cypress.env("FILECOMPONENTS_INSTANCE1"),
-      importVerifyDir: Cypress.env("FILECOMPONENTS_INSTANCE2"),
+      extractedFilesDir: Cypress.env("FILECOMPONENTS_INSTANCE2"),
+      importVerifyDir: Cypress.env("FILECOMPONENTS_INSTANCE1"),
     }).then((result) => {
       if (!result.success) {
         cy.task("log", "YAML verification failed. Summary:", result.summary);
@@ -29,6 +29,8 @@ describe("Verification Process", () => {
     });
   });
 });
+
+
 
 describe("Verification Process", () => {
   it("Performing the UI Verification", () => {

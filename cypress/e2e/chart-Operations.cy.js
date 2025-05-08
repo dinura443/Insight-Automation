@@ -15,7 +15,7 @@ describe("Chart Operations", () => {
     }
     chartNames = envList.split(",").map((name) => name.trim());
   });
-
+  
   it("should perform bulk export of charts", () => {
     cy.log("Logging in...");
     login.visitInstance1();

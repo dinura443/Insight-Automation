@@ -10,13 +10,15 @@ export class DashBoard {
   dashboardbtn = "//a[normalize-space()='Dashboards']";
   deleteBtn = "(//span[@aria-label='trash'])[1]";
   deleteTxtBox = "(//input[@id='delete'])[1]";
-  deleteConfirmBtn = "(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-dangerous antd5-btn-color-dangerous antd5-btn-variant-solid superset-button superset-button-danger cta css-1pe2gaq'])[1]";
+  deleteConfirmBtn = "(//button[@type='button'])[11]";
   bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
   importbutton = "//span[normalize-space()='Import']";
   exportButton = "//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
   overwriteInputSelector = "#overwrite";
   overwriteButtonSelector = 'button:contains("Overwrite")';
   gridViewbtn = "(//div[@class='toggle-button active'])[1]";
+  deletebulkbtn = "(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-dangerous antd5-btn-color-dangerous antd5-btn-variant-solid superset-button superset-button-danger cta css-1pe2gaq'])[1]";
+
 
   clickBulkSelectButton() {
     cy.log("Clicking the 'Bulk Select' button...");
@@ -26,6 +28,26 @@ export class DashBoard {
       .click();
   }
 
+  Deletedashboard(){
+    cy.log("Clicking the 'Delete' button...");
+    cy.xpath(this.deletebulkbtn)
+      .should('exist')
+      .and('be.visible')
+      .click();
+      cy.xpath(this.deleteTxtBox, { timeout: 2000 })
+      .should('exist')
+      .and('be.visible')
+      .type('DELETE')
+      .then(() => {
+        cy.log('Typed "DELETE" into the input field.');
+      });
+
+    cy.xpath(this.deleteConfirmBtn, { timeout: 2000 })
+      .should('exist')
+      .and('be.visible')
+      .click();
+    cy.log('Clicked the "Confirm" button.');
+  }
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
     cy.xpath(this.dashboardbtn).click();

@@ -68,6 +68,7 @@ describe("File Operations", () => {
   });
 });
 
+
 describe("File Operations", () => {
   it("Scrape dashboard details from all dashboards (instance: 1)", () => {
     cy.log("Logging in...");
@@ -121,7 +122,6 @@ describe("File Operations", () => {
     cy.log("Scraping all dashboard details completed successfully.");
   });
 });
-
 describe("File Operations", () => {
   const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
   const desiredDownloadPath = "ARCHIVE_INSTANCE1";
@@ -172,6 +172,7 @@ describe("File Operations", () => {
       dashboard.bulkExportDashboards(dashboardsAlreadyExist);
       cy.wait(3000);
 
+
       cy.task("getLatestFile", Cypress.env("downloadDir")).then((latestFilePath) => {
         if (!latestFilePath) {
           cy.log("No files found to back up.");
@@ -190,10 +191,17 @@ describe("File Operations", () => {
         });
 
         cy.log("Pre-import backup completed successfully.");
+
+        dashboard.Deletedashboard();
+        cy.log("Deleting existing dashboards...");
+        
+        cy.wait(2000);
       });
     });
   });
 
+
+  
   it("Import the dashboard from Instance 1 (instance: 2)", () => {
     cy.readFile(statusFile).then((status) => {
       if (!status.backupTestPassed) {
@@ -221,7 +229,6 @@ describe("File Operations", () => {
         cy.log("Uploading the dashboard file...");
         dashboard.uploadSpecificFile(desiredFilePath);
         cy.wait(2000);
-        dashboard.confirmOverwrite();
 
         cy.log("Dashboard import completed successfully.");
       });
