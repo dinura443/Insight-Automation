@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { VerifyExporter } from "./page-objects-and-services/page-objects/dashboard-File-Verification";
 import { UiVerifier } from "./page-objects-and-services/page-objects/dashboard-Ui-Verification";
+import { SingleUiVerifier } from "./page-objects-and-services/page-objects/dashboard-Single-Ui-Verification";
 
 dotenv.config();
 
@@ -313,6 +314,14 @@ export default defineConfig({
         },
       });
 
+
+      on("task", {
+        verifySingleImportUiContents({ dashboardUi, itemName }) {
+          const uiVerifier = new SingleUiVerifier(dashboardUi, itemName);
+          const result = uiVerifier.verify();
+          return result;
+        },
+      });
       on("task", {
         writeJson({ filename, data }) {
           try {

@@ -4,7 +4,7 @@ import { DashBoard } from "../../page-objects-and-services/page-objects/dashboar
 const login = new LoginPage();
 const dashboard = new DashBoard();
 
-describe("File Operations", () => {
+describe("Bulk Import Operation ", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
   const desiredDownloadPath = "ARCHIVE_INSTANCE1";
@@ -69,7 +69,7 @@ describe("File Operations", () => {
 });
 
 
-describe("File Operations", () => {
+describe("Bulk Import Operation ", () => {
   it("Scrape dashboard details from all dashboards (instance: 1)", () => {
     cy.log("Logging in...");
     login.visitInstance1();
@@ -122,7 +122,7 @@ describe("File Operations", () => {
     cy.log("Scraping all dashboard details completed successfully.");
   });
 });
-describe("File Operations", () => {
+describe("Bulk Import Operation ", () => {
   const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
   const desiredDownloadPath = "ARCHIVE_INSTANCE1";
   const statusFile = "cypress/fixtures/test-status.json";
@@ -236,7 +236,7 @@ describe("File Operations", () => {
   });
 });
 
-describe("File Operations", () => {
+describe("Bulk Import Operation ", () => {
   it("Scrape dashboard details from all dashboards from the instance 2 (instance: 2)", () => {
     cy.log("Logging in...");
     login.visitInstance2();
@@ -290,7 +290,7 @@ describe("File Operations", () => {
   });
 });
 
-describe("File Operations", () => {
+describe("Bulk Import Operation ", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE2");
   const desiredDownloadPath = "ARCHIVE_INSTANCE2";
