@@ -213,7 +213,7 @@ describe("Single Import Operation", () => {
     cy.wait(5000);
 
     dashboard.typeInputAndPressEnter(itemName);
-    cy.wait(2000);
+    cy.wait(5000);
     cy.log(`Searching for item name: "${itemName}"`);
 
     dashboard.findRowByItemName(itemName)
