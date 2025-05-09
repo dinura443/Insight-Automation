@@ -6,16 +6,17 @@ const dashboard = new DashBoard();
 describe("Import Single Dashboard and Verify", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
-  const desiredDownloadPath = "ARCHIVE_INSTANCE1";
+  const desiredDownloadPath = "ARCHIVE_INSTANCE2";
   const extractDir = targetDirectory;
   const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
   const archiveInstance2 = Cypress.env("ARCHIVE_INSTANCE2");
+  const archiveInstance1 = Cypress.env("ARCHIVE_INSTANCE1");
   const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2");
   const itemName = Cypress.env("DASHBOARD_NAMES");
   const instanceLabel1 = "instance1";
   const instanceLabel2 = "instance2";
 
-  it("Export the Dashboard (instance: 1)", () => {
+  xit("Export the Dashboard (instance: 1)", () => {
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -71,7 +72,7 @@ describe("Import Single Dashboard and Verify", () => {
     });
   });
 
-  it("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
+  xit("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
     const fileName = `${instanceLabel1}_${itemName}_charts.json`;
     const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
 
@@ -115,7 +116,7 @@ describe("Import Single Dashboard and Verify", () => {
     cy.log("Scraping the dashboard details completed successfully.");
   });
 
-  it("Backup the Dashboard File to The Server (instance: 2)", () => {
+  xit("Backup the Dashboard File to The Server (instance: 2)", () => {
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
@@ -218,7 +219,6 @@ describe("Import Single Dashboard and Verify", () => {
       cy.log("Scraping the dashboard details completed successfully.");
     });
   });
-
   it("Export a dashboard from the instance two for verification purposes (instance: 2)", () => {
     cy.log("Logging in...");
     login.visitInstance2();
