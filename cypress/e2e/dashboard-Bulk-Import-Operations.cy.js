@@ -8,6 +8,8 @@ describe("Bulk Import and Export Operations", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectoryInstance1 = Cypress.env("FILECOMPONENTS_INSTANCE1");
   const targetDirectoryInstance2 = Cypress.env("FILECOMPONENTS_INSTANCE2");
+  const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
+  const instance2Archive = Cypress.env("ARCHIVE_INSTANCE2");
   const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
   const desiredDownloadPathInstance2 = "ARCHIVE_INSTANCE2";
   const extractDirInstance1 = targetDirectoryInstance1;
@@ -86,8 +88,6 @@ describe("Bulk Import and Export Operations", () => {
     cy.wait(5000);
 
     cy.log("Clicking Bulk Select to prepare for pre-import backup...");
-    dashboard.clickBulkSelectButton();
-    cy.wait(1000);
 
     const foundDashboardNames = [];
     cy.get("td a").each(($el) => {
@@ -139,13 +139,14 @@ describe("Bulk Import and Export Operations", () => {
     dashboard.visitDashboard();
     cy.wait(5000);
 
-    cy.task("getLatestFile", targetDirectoryInstance1).then((latestFilePath) => {
+    cy.task("getLatestFile", instance1Archive).then((latestFilePath) => {
       if (!latestFilePath) {
-        throw new Error(`No files found in directory: ${targetDirectoryInstance1}`);
+        throw new Error(`No files found in directory: ${instance1Archive}`);
       }
 
       const fileName = Cypress._.last(latestFilePath.split("/"));
       const desiredFilePath = `${desiredDownloadPathInstance1}/${fileName}`;
+      cy.log(`File to import: ${desiredFilePath}`);
 
       cy.log("Uploading the dashboard file...");
       dashboard.uploadSpecificFile(desiredFilePath);

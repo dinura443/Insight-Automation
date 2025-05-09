@@ -1,4 +1,3 @@
-import cypress from "cypress";
 import { LoginPage } from "../../page-objects-and-services/page-objects/Login";
 import { DashBoard } from "../../page-objects-and-services/page-objects/dashboard-Objects";
 const login = new LoginPage();
@@ -7,18 +6,17 @@ const dashboard = new DashBoard();
 describe("Import Single Dashboard and Verify", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
-  const desiredDownloadPath = "ARCHIVE_INSTANCE2";
+  const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
   const extractDir = targetDirectory;
   const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
+  const desiredDownloadPathInstance2 = "ARCHIVE_INSTANCE2";
   const archiveInstance2 = Cypress.env("ARCHIVE_INSTANCE2");
-  const archiveInstance1 = Cypress.env("ARCHIVE_INSTANCE1");
   const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2");
   const itemName = Cypress.env("DASHBOARD_NAMES");
   const instanceLabel1 = "instance1";
   const instanceLabel2 = "instance2";
 
   it("Export the Dashboard (instance: 1)", () => {
-    const extractDir = cypress.env("ARCHIVE_INSTANCE");
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -48,7 +46,7 @@ describe("Import Single Dashboard and Verify", () => {
       const zipPath = latestFilePath;
       const fileName = Cypress._.last(latestFilePath.split("/"));
       const originalFilePath = latestFilePath;
-      const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
+      const desiredFilePath = `${desiredDownloadPathInstance1}/${fileName}`;
 
       cy.log(`Unzipping ZIP file: ${zipPath}`);
       cy.task("unzipFile", { zipPath, extractDir }).then((result) => {
@@ -167,13 +165,14 @@ describe("Import Single Dashboard and Verify", () => {
     cy.wait(5000);
 
 
+
     cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
       if (!latestFilePath) {
         throw new Error(`No files found in directory: ${dashboardInstance1Archive}`);
       }
 
       const fileName = Cypress._.last(latestFilePath.split("/"));
-      const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
+      const desiredFilePath = `${desiredDownloadPathInstance1}/${fileName}`;
       cy.log("Uploading the dashboard file...");
       dashboard.uploadSpecificFile(desiredFilePath);
       cy.wait(2000);
@@ -221,6 +220,7 @@ describe("Import Single Dashboard and Verify", () => {
       cy.log("Scraping the dashboard details completed successfully.");
     });
   });
+
   it("Export a dashboard from the instance two for verification purposes (instance: 2)", () => {
     cy.log("Logging in...");
     login.visitInstance2();
@@ -251,7 +251,7 @@ describe("Import Single Dashboard and Verify", () => {
 
       const fileName = Cypress._.last(latestFilePath.split("/"));
       const originalFilePath = latestFilePath;
-      const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
+      const desiredFilePath = `${desiredDownloadPathInstance2}/${fileName}`;
 
       cy.task("moveFile", {
         source: originalFilePath,

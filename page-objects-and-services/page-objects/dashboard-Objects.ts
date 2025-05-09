@@ -50,8 +50,9 @@ export class DashBoard {
   }
   visitDashboard() {
     cy.log("Navigating to the dashboard...");
+    cy.wait(2000);
     cy.xpath(this.dashboardbtn).click();
-    cy.wait(10000);
+    cy.wait(2000);
   }
 
   clickGridViewButton() {
