@@ -16,7 +16,7 @@ describe("Import Single Dashboard and Verify", () => {
   const instanceLabel1 = "instance1";
   const instanceLabel2 = "instance2";
 
-  xit("Export the Dashboard (instance: 1)", () => {
+  it("Export the Dashboard (instance: 1)", () => {
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -72,7 +72,7 @@ describe("Import Single Dashboard and Verify", () => {
     });
   });
 
-  xit("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
+  it("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
     const fileName = `${instanceLabel1}_${itemName}_charts.json`;
     const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
 
@@ -116,7 +116,7 @@ describe("Import Single Dashboard and Verify", () => {
     cy.log("Scraping the dashboard details completed successfully.");
   });
 
-  xit("Backup the Dashboard File to The Server (instance: 2)", () => {
+  it("Backup the Dashboard File to The Server (instance: 2)", () => {
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
