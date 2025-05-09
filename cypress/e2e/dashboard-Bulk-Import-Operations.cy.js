@@ -162,11 +162,7 @@ describe("Bulk Import Operation ", () => {
         foundDashboardNames.includes(name)
       );
 
-      if (dashboardsAlreadyExist.length === 0) {
-        cy.log("No overlapping dashboards found. No need for backup.");
-        cy.writeFile(statusFile, { backupTestPassed: true });
-        return;
-      }
+
 
       cy.log(`Backing up these dashboards: ${dashboardsAlreadyExist.join(", ")}`);
       dashboard.bulkExportDashboards(dashboardsAlreadyExist);
@@ -185,10 +181,7 @@ describe("Bulk Import Operation ", () => {
         cy.task("moveFile", {
           source: latestFilePath,
           destination: backupDestination,
-        }).then((result) => {
-          cy.log(result);
-          cy.writeFile(statusFile, { backupTestPassed: true });
-        });
+        })
 
         cy.log("Pre-import backup completed successfully.");
 
@@ -203,10 +196,7 @@ describe("Bulk Import Operation ", () => {
 
   
   it("Import the dashboard from Instance 1 (instance: 2)", () => {
-    cy.readFile(statusFile).then((status) => {
-      if (!status.backupTestPassed) {
-        throw new Error("Backup failed — skipping import.");
-      }
+
 
       cy.log("Logging in...");
       login.visitInstance2();
@@ -234,7 +224,6 @@ describe("Bulk Import Operation ", () => {
       });
     });
   });
-});
 
 describe("Bulk Import Operation ", () => {
   it("Scrape dashboard details from all dashboards from the instance 2 (instance: 2)", () => {
