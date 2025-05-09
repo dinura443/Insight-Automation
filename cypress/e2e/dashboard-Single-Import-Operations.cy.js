@@ -1,3 +1,4 @@
+import cypress from "cypress";
 import { LoginPage } from "../../page-objects-and-services/page-objects/Login";
 import { DashBoard } from "../../page-objects-and-services/page-objects/dashboard-Objects";
 const login = new LoginPage();
@@ -17,6 +18,7 @@ describe("Import Single Dashboard and Verify", () => {
   const instanceLabel2 = "instance2";
 
   it("Export the Dashboard (instance: 1)", () => {
+    const extractDir = cypress.env("ARCHIVE_INSTANCE1");
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
