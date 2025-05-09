@@ -177,11 +177,15 @@ describe("Bulk Import Operation ", () => {
         }
 
         const fileName = Cypress._.last(latestFilePath.split("/"));
-        const backupDestination = `${backupDir}/${fileName}`;
+        const originalFilePath = latestFilePath;
+        const backupDestination = `cypress/fixtures/backups/pre-import/${fileName}`;
         cy.task("moveFile", {
-          source: latestFilePath,
+          source: originalFilePath,
           destination: backupDestination,
-        })
+            }).then((result) => {
+          cy.log(result);
+          cy.log("File moved to the backup directory successfully.");
+        });
 
         cy.log("Pre-import backup completed successfully.");
 

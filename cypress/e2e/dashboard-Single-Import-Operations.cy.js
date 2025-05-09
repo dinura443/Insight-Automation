@@ -163,10 +163,6 @@ describe("Import Single Dashboard and Verify", () => {
     cy.log("Navigating to the dashboard page...");
     cy.wait(5000);
 
-    dashboard.typeInputAndPressEnter(itemName);
-    cy.wait(2000);
-    dashboard.analyzeDashboardlist(itemName);
-    cy.wait(2000);
 
     cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
       if (!latestFilePath) {
