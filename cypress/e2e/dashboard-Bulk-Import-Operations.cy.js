@@ -19,7 +19,7 @@ describe("Bulk Import Operation ", () => {
     dashboardNames = envList.split(",").map((name) => name.trim());
   });
 
-  xit("Bulk Export Dashboards (instance: 1)", () => {
+  it("Bulk Export Dashboards (instance: 1)", () => {
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -70,7 +70,7 @@ describe("Bulk Import Operation ", () => {
 
 
 describe("Bulk Import Operation ", () => {
-  xit("Scrape dashboard details from all dashboards (instance: 1)", () => {
+  it("Scrape dashboard details from all dashboards (instance: 1)", () => {
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
