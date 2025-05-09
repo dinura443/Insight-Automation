@@ -3,11 +3,17 @@ import { DashBoard } from "../../page-objects-and-services/page-objects/dashboar
 const login = new LoginPage();
 const dashboard = new DashBoard();
 
-describe("Single Import Operation", () => {
-    const downloadDirectory = Cypress.env("downloadDir");
-    const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
-    const desiredDownloadPath = "ARCHIVE_INSTANCE1";
+describe("Import Single Dashboard and Verify", () => {
+  const downloadDirectory = Cypress.env("downloadDir");
+  const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
+  const desiredDownloadPath = "ARCHIVE_INSTANCE1";
   const extractDir = targetDirectory;
+  const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
+  const archiveInstance2 = Cypress.env("ARCHIVE_INSTANCE2");
+  const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2");
+  const itemName = Cypress.env("DASHBOARD_NAMES");
+  const instanceLabel1 = "instance1";
+  const instanceLabel2 = "instance2";
 
   it("Export the Dashboard (instance: 1)", () => {
     cy.log("Logging in...");
@@ -21,7 +27,6 @@ describe("Single Import Operation", () => {
     cy.wait(5000);
     cy.log("Navigating to the dashboard page...");
 
-    const itemName = Cypress.env("DASHBOARD_NAMES");
     dashboard.typeInputAndPressEnter(itemName);
     cy.wait(2000);
     cy.log(`Finding dashboard name: ${itemName}`);
@@ -65,11 +70,11 @@ describe("Single Import Operation", () => {
       cy.log("Downloading the dashboard from the instance1 completed successfully.");
     });
   });
-});
 
-
-describe("Single Import Operation", () => {
   it("Scrape the dashboard details from the instance1 dashboard (instance: 1)", () => {
+    const fileName = `${instanceLabel1}_${itemName}_charts.json`;
+    const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
+
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -79,11 +84,6 @@ describe("Single Import Operation", () => {
 
     dashboard.visitDashboard();
     cy.wait(5000);
-
-    const itemName = Cypress.env("dashboard");
-    const instanceLabel = "instance1";
-    const fileName = `${instanceLabel}_${itemName}_charts.json`;
-    const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
 
     cy.log(`Searching for the dashboard name: "${itemName}"`);
     cy.wait(2000);
@@ -114,16 +114,6 @@ describe("Single Import Operation", () => {
 
     cy.log("Scraping the dashboard details completed successfully.");
   });
-});
-
-describe("Single Import Operation", () => {
-  const targetUrl = Cypress.env("instance2Dashboard");
-  const dashboardInstance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
-  const desiredDownloadPath = "ARCHIVE_INSTANCE1";
-  const dashboardName = Cypress.env("DASHBOARD_NAMES");
-  const downloadDirectory = Cypress.env("downloadDir");
-
-
 
   it("Backup the Dashboard File to The Server (instance: 2)", () => {
     login.visitInstance2();
@@ -135,7 +125,6 @@ describe("Single Import Operation", () => {
     dashboard.visitDashboard();
     cy.wait(5000);
 
-    const itemName = Cypress.env("DASHBOARD_NAMES");
     dashboard.typeInputAndPressEnter(itemName);
     cy.wait(2000);
     dashboard.findRowByItemName(itemName);
@@ -157,50 +146,46 @@ describe("Single Import Operation", () => {
         destination: destinationPath,
       }).then((result) => {
         cy.log(result);
-        cy.log("File moved to the backup directory successfully.");});
-
-    });
-  });
-  it("Import the dashboard from the instance1 (instance: 2)", () => {
-      cy.log("Logging in...");
-      login.visitInstance2();
-      login.enterUsername(Cypress.env("username"));
-      login.enterPassword(Cypress.env("password"));
-      login.clickLoginButton();
-      cy.wait(2000);
-
-      dashboard.visitDashboard();
-      cy.log("Navigating to the dashboard page...");
-      cy.wait(5000);
-
-      dashboard.typeInputAndPressEnter(dashboardName);
-      cy.wait(2000);
-      dashboard.analyzeDashboardlist(dashboardName);
-      cy.wait(2000);
-
-      cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
-        if (!latestFilePath) {
-          throw new Error(`No files found in directory: ${dashboardInstance1Archive}`);
-        }
-
-        const fileName = Cypress._.last(latestFilePath.split("/"));
-        const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
-        cy.log("Uploading the dashboard file...");
-        dashboard.uploadSpecificFile(desiredFilePath);
-        cy.wait(2000);
-        cy.log("Dashboard import completed successfully.");
+        cy.log("File moved to the backup directory successfully.");
       });
     });
   });
 
+  it("Import the dashboard from the instance1 (instance: 2)", () => {
+    cy.log("Logging in...");
+    login.visitInstance2();
+    login.enterUsername(Cypress.env("username"));
+    login.enterPassword(Cypress.env("password"));
+    login.clickLoginButton();
+    cy.wait(2000);
 
-describe("Single Import Operation", () => {
-  const itemName = Cypress.env("dashboard");
-  const instanceLabel = 'instance2'; 
-  const fileName = `${instanceLabel}_${itemName}_charts.json`;
-  const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
+    dashboard.visitDashboard();
+    cy.log("Navigating to the dashboard page...");
+    cy.wait(5000);
 
-  it("Scrape the dashboard details from the instance2 dashboard ( instance : 2 )", () => {
+    dashboard.typeInputAndPressEnter(itemName);
+    cy.wait(2000);
+    dashboard.analyzeDashboardlist(itemName);
+    cy.wait(2000);
+
+    cy.task("getLatestFile", dashboardInstance1Archive).then((latestFilePath) => {
+      if (!latestFilePath) {
+        throw new Error(`No files found in directory: ${dashboardInstance1Archive}`);
+      }
+
+      const fileName = Cypress._.last(latestFilePath.split("/"));
+      const desiredFilePath = `${desiredDownloadPath}/${fileName}`;
+      cy.log("Uploading the dashboard file...");
+      dashboard.uploadSpecificFile(desiredFilePath);
+      cy.wait(2000);
+      cy.log("Dashboard import completed successfully.");
+    });
+  });
+
+  it("Scrape the dashboard details from the instance2 dashboard (instance: 2)", () => {
+    const fileName = `${instanceLabel2}_${itemName}_charts.json`;
+    const fixturesFilePath = `cypress/fixtures/UIComponents/${fileName}`;
+
     cy.log("Logging in...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -237,16 +222,8 @@ describe("Single Import Operation", () => {
       cy.log("Scraping the dashboard details completed successfully.");
     });
   });
-});
 
-describe("Single Import Operation", () => {
-  const originalDownloadPath = Cypress.env("downloadDir");
-  const archiveInstance2 = Cypress.env("ARCHIVE_INSTANCE2");
-  const itemName = Cypress.env("DASHBOARD_NAMES");
-  const desiredDownloadPath = "ARCHIVE_INSTANCE2";
-  const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2");
-
-  it("Export a dashboard from the instance two for verification purposes ( instance : 2 )", () => {
+  it("Export a dashboard from the instance two for verification purposes (instance: 2)", () => {
     cy.log("Logging in...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -269,9 +246,9 @@ describe("Single Import Operation", () => {
     cy.wait(2000);
 
     cy.log("Extracting to the dashboard_instance2 dir...");
-    cy.task("getLatestFile", originalDownloadPath).then((latestFilePath) => {
+    cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
       if (!latestFilePath) {
-        throw new Error(`No files found in directory: ${originalDownloadPath}`);
+        throw new Error(`No files found in directory: ${downloadDirectory}`);
       }
 
       const fileName = Cypress._.last(latestFilePath.split("/"));
