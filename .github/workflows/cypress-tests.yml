@@ -61,9 +61,7 @@ jobs:
             exit 1
           fi
 
-          # Optional: Pass username/password from secrets or input
-          echo "USERNAME=${{ secrets.USERNAME }}" >> $GITHUB_ENV
-          echo "PASSWORD=${{ secrets.PASSWORD }}" >> $GITHUB_ENV
+
 
       - name: Create SSH key
         run: |
