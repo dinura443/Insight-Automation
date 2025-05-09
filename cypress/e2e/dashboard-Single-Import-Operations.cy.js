@@ -18,7 +18,7 @@ describe("Import Single Dashboard and Verify", () => {
   const instanceLabel2 = "instance2";
 
   it("Export the Dashboard (instance: 1)", () => {
-    const extractDir = cypress.env("ARCHIVE_INSTANCE1");
+    const extractDir = cypress.env("ARCHIVE_INSTANCE");
     cy.log("Logging in...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
