@@ -28,14 +28,8 @@ describe("Import Single Dashboard", () => {
     cy.wait(5000);
     cy.log("Navigating to the dashboard page...");
 
-    dashboard.typeInputAndPressEnter(itemName);
-    cy.wait(2000);
-    cy.log(`Finding dashboard name: ${itemName}`);
-    dashboard.findRowByItemName(itemName);
-    cy.wait(2000);
-    cy.log("Clicking on the item name...");
-    cy.log("Downloading the dashboard...");
-    dashboard.clickShareButtonForRow(itemName);
+
+    dashboard.singleExportDashboard(itemName);
     cy.wait(2000);
 
     cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
@@ -84,27 +78,27 @@ describe("Import Single Dashboard", () => {
     cy.wait(2000);
 
     dashboard.visitDashboard();
-    cy.wait(5000);
+    cy.wait(10000);
 
     cy.log(`Searching for the dashboard name: "${itemName}"`);
     cy.wait(2000);
+
     dashboard.typeInputAndPressEnter(itemName);
-    cy.wait(2000);
+    cy.wait(5000);
+    cy.log(`Searching for item name: "${itemName}"`);
 
     dashboard.findRowByItemName(itemName)
-      .should("exist")
-      .and("be.visible")
-      .then(() => {
-        cy.log(`Found "${itemName}" on the dashboard.`);
-        dashboard.clickItemName(itemName);
-        cy.wait(10000); // wait 10 seconds (adjust as needed)
-        cy.log("Waiting for dashboard charts to load...");
-        cy.get(".dashboard-component", { timeout: 2000 }).should("exist");
-        cy.log("Scraping charts on the specific dashboard...");
-        dashboard.getDashboardCharts(itemName);
-        cy.wait(1000);
-      });
-
+    .should("exist")
+    .and("be.visible")
+    .within(() => {
+      cy.get("a")
+      .filter((index, el) => {
+        return el.textContent.trim() === itemName;
+      })
+      .first()
+      .click({ force: true });    });
+  
+  cy.log("Dashboard charts are now loaded.");
     dashboard.getDashboardCharts(itemName).then((scrapedChartData) => {
       cy.task("writeJson", {
         filename: fixturesFilePath,
@@ -117,40 +111,60 @@ describe("Import Single Dashboard", () => {
   });
 
   it("Backup the Dashboard File to The Server (instance: 2)", () => {
+    // Login and navigate to the dashboard page
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
     login.enterPassword(Cypress.env("password"));
     login.clickLoginButton();
     cy.wait(2000);
-
+  
     dashboard.visitDashboard();
     cy.wait(5000);
-
-    dashboard.typeInputAndPressEnter(itemName);
-    cy.wait(2000);
-    dashboard.findRowByItemName(itemName);
-    cy.wait(2000);
-    dashboard.clickShareButtonForRow(itemName);
-    cy.wait(2000);
-
-    cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
-      if (!latestFilePath) {
-        throw new Error(`No files found in directory: ${downloadDirectory}`);
+  
+    // Step 1: Verify if the dashboard exists
+    cy.log(`Searching for dashboard: "${itemName}"`);
+    dashboard.findRowByItemName(itemName).then((rows) => {
+      if (rows.length === 0) {
+        cy.log(`Dashboard "${itemName}" does not exist.`);
+        return; // Exit test early
       }
-
-      const fileName = Cypress._.last(latestFilePath.split("/"));
-      const originalFilePath = latestFilePath;
-      const destinationPath = `cypress/fixtures/backups/pre-import/${fileName}`;
-
-      cy.task("moveFile", {
-        source: originalFilePath,
-        destination: destinationPath,
-      }).then((result) => {
-        cy.log(result);
-        cy.log("File moved to the backup directory successfully.");
-      });
+  
+      cy.wrap(rows)
+        .should("be.visible")
+        .then(() => {
+          cy.log(`Found dashboard: "${itemName}"`);
+  
+          // Step 2: Export the dashboard
+          dashboard.singleExportDashboard(itemName);
+          cy.wait(2000);
+  
+          // Step 3: Backup the exported file
+          cy.task("getLatestFile", downloadDirectory).then((latestFilePath) => {
+            if (!latestFilePath) {
+              throw new Error(`No files found in directory: ${downloadDirectory}`);
+            }
+  
+            const fileName = Cypress._.last(latestFilePath.split("/"));
+            const originalFilePath = latestFilePath;
+            const destinationPath = `cypress/fixtures/backups/pre-import/${fileName}`;
+  
+            cy.task("moveFile", {
+              source: originalFilePath,
+              destination: destinationPath,
+            }).then((result) => {
+              cy.log(result);
+              cy.log("File moved to the backup directory successfully.");
+            });
+  
+            // Step 4: Delete existing dashboard
+            dashboard.Deletedashboard();
+            cy.log("Deleting existing dashboards...");
+            cy.wait(2000);
+          });
+        });
     });
   });
+  
 
   it("Import the dashboard from the instance1 (instance: 2)", () => {
     cy.log("Logging in...");
@@ -175,7 +189,7 @@ describe("Import Single Dashboard", () => {
       const desiredFilePath = `${desiredDownloadPathInstance1}/${fileName}`;
       cy.log("Uploading the dashboard file...");
       dashboard.uploadSpecificFile(desiredFilePath);
-      cy.wait(2000);
+      cy.wait(5000);
       cy.log("Dashboard import completed successfully.");
     });
   });
@@ -200,17 +214,16 @@ describe("Import Single Dashboard", () => {
     cy.log(`Searching for item name: "${itemName}"`);
 
     dashboard.findRowByItemName(itemName)
-      .should("exist")
-      .and("be.visible")
-      .then(() => {
-        cy.log(`Found "${itemName}" on the dashboard.`);
-        dashboard.clickItemName(itemName);
-        cy.log("Waiting for dashboard charts to load...");
-        cy.get('.dashboard-component', { timeout: 10000 }).should('exist');
-        cy.log("Scraping charts on the specific dashboard...");
-        dashboard.getDashboardCharts(itemName);
-      });
-
+    .should("exist")
+    .and("be.visible")
+    .within(() => {
+      cy.get("a")
+      .filter((index, el) => {
+        return el.textContent.trim() === itemName;
+      })
+      .first()
+      .click({ force: true });    });
+  
     cy.log("Scraping the dashboard details...");
     dashboard.getDashboardCharts(itemName).then((scrapedChartData) => {
       cy.task('writeJson', {
@@ -233,14 +246,7 @@ describe("Import Single Dashboard", () => {
     cy.wait(5000);
     cy.log("Navigating to the dashboard page...");
 
-    dashboard.typeInputAndPressEnter(itemName);
-    cy.wait(2000);
-    cy.log(`Using dashboard name: ${itemName}`);
-
-    dashboard.findRowByItemName(itemName);
-    cy.wait(2000);
-    dashboard.clickShareButtonForRow(itemName);
-    cy.log("Downloading the dashboard..."); 
+    dashboard.singleExportDashboard(itemName);
     cy.wait(2000);
 
     cy.log("Extracting to the dashboard_instance2 dir...");

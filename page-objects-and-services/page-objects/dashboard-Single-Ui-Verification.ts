@@ -63,8 +63,8 @@ export class SingleUiVerifier {
 
 
   public verify(): { success: boolean; summary: any } {
-    const instance1FilePath = path.join(this.dashboardUi, `instance1_dinura_charts.json`);
-    const instance2FilePath = path.join(this.dashboardUi, `instance2_dinura_charts.json`);
+    const instance1FilePath = path.join(this.dashboardUi, `instance1_${this.itemName}_charts.json`);
+    const instance2FilePath = path.join(this.dashboardUi, `instance2_${this.itemName}_charts.json`);
 
     console.log(`Comparing UI contents for: ${this.itemName}`);
     console.log(`Instance 1 file path: ${instance1FilePath}`);

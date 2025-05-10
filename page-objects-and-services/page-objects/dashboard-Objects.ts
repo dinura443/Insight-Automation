@@ -4,6 +4,7 @@ export class DashBoard {
   tableRowSelector = 'tr[role="row"]';
   itemNameSelector = "td a";
   shareButtonSelector = 'span[aria-label="share"]';
+  singleDeleteButtonSelector = 'anticon css-1lff5bx';
   importButtonSelector = 'button > span[aria-label="import"]';
   selectFileInputSelector = "#modelFile";
   importDialogImportButtonSelector = 'button[type="submit"][data-title="Import"]';
@@ -27,6 +28,9 @@ export class DashBoard {
       .and('be.visible')
       .click();
   }
+
+
+
 
   Deletedashboard(){
     cy.log("Clicking the 'Delete' button...");
@@ -76,6 +80,48 @@ export class DashBoard {
       .click();
   }
 
+
+
+  singleExportDashboard(dashboardName: string): void {
+    cy.log(`Starting single export for dashboard: ${dashboardName}`);
+
+    // Step 1: Click "Bulk Select" button
+    cy.xpath(this.bulkSelectBtn).click({ force: true });
+    cy.wait(1000); // Small delay to ensure checkboxes are visible
+
+    // Step 2: Get all dashboard names in order from the DOM
+    const foundDashboardNames: string[] = [];
+
+    cy.get("td a").each(($el) => {
+      const name = $el.text().trim();
+      if (name !== "") {
+        foundDashboardNames.push(name);
+      }
+    }).then(() => {
+      // Log full list for debugging
+      cy.log("Found Dashboard List:", JSON.stringify(foundDashboardNames));
+
+      // Step 3: Find the dashboard to export
+      const index = foundDashboardNames.indexOf(dashboardName);
+      if (index === -1) {
+        throw new Error(`Dashboard "${dashboardName}" not found in list.`);
+      }
+
+      // Step 4: Check the corresponding checkbox
+      const checkboxXPath = `(//input[@id='${index}'])[1]`;
+      cy.xpath(checkboxXPath)
+        .should("exist")
+        .check({ force: true })
+        .log(`Checked dashboard at index ${index}: "${foundDashboardNames[index]}"`);
+
+      // Step 5: Click Export button
+      cy.xpath(this.exportButton)
+        .should("be.visible")
+        .click({ force: true });
+
+      cy.log("Single export completed.");
+    });
+  }
   bulkExportDashboards(dashboardNames: string[]): void {
     cy.log(`Starting bulk export for ${dashboardNames.length} dashboards`);
 
@@ -127,14 +173,11 @@ export class DashBoard {
   }
 
   findRowByItemName(itemName: string) {
-    cy.log(`Searching for item name: "${itemName}"`);
-    return cy.contains(this.itemNameSelector, itemName)
-      .should("exist")
-      .and("be.visible")
-      .then(($element) => {
-        cy.log(`Found item name: "${itemName}" in the DOM`);
-        return cy.wrap($element).closest(this.tableRowSelector);
-      });
+    cy.log(`Searching for item name (exact match): "${itemName}"`);
+  
+    return cy.get("td a").filter((index, el) => {
+      return el.textContent?.trim() === itemName;
+    }).first().closest("tr");
   }
 
   clickItemName(itemName: string) {
@@ -159,6 +202,20 @@ export class DashBoard {
       });
   }
 
+
+
+  DeleteSingleDashboard(itemName: string) {
+    this.findRowByItemName(itemName)
+      .should("exist")
+      .within(() => {
+        cy.get(this.singleDeleteButtonSelector)
+          .should("exist")
+          .click()
+          .then(() => {
+            cy.log("Delete button clicked");
+          });
+      });
+  }
   analyzeDashboardlist(dashboard: string) {
     cy.get('body').then(($body) => {
       const matchingRow = $body.find(`tr:contains("${dashboard}")`);
