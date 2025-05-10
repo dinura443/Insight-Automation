@@ -4,7 +4,7 @@ import { DashBoard } from "../../page-objects-and-services/page-objects/dashboar
 const login = new LoginPage();
 const dashboard = new DashBoard();
 
-describe("Bulk Import and Export Operations", () => {
+describe("Bulk Import Operations", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectoryInstance1 = Cypress.env("FILECOMPONENTS_INSTANCE1");
   const targetDirectoryInstance2 = Cypress.env("FILECOMPONENTS_INSTANCE2");

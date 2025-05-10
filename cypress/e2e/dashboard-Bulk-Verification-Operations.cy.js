@@ -1,4 +1,4 @@
-describe(" Bulk Verification Process", () => {
+describe("Bulk Verification Process", () => {
   it("Performing the file verification", () => {
     const instance1DashboardDir = Cypress.env("FILECOMPONENTS_INSTANCE1");
     const instance2DashboardDir = Cypress.env("FILECOMPONENTS_INSTANCE2");
@@ -28,11 +28,7 @@ describe(" Bulk Verification Process", () => {
       expect(result.success, "YAML verification passed").to.be.true;
     });
   });
-});
 
-
-
-describe("Bulk Verification Process", () => {
   it("Performing the UI Verification", () => {
     const dashboardUi = Cypress.env("dashboardUi");
     const itemName = Cypress.env("DASHBOARD_NAMES");
@@ -53,10 +49,7 @@ describe("Bulk Verification Process", () => {
       expect(result.success, "UI verification passed").to.be.true;
     });
   });
-});
 
-
-describe("Bulk Verification Process", () => {
   it("End-to-End Clean Up", () => {
     const instance2Archive = Cypress.env("ARCHIVE_INSTANCE2");
     const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");

@@ -3,7 +3,7 @@ import { DashBoard } from "../../page-objects-and-services/page-objects/dashboar
 const login = new LoginPage();
 const dashboard = new DashBoard();
 
-describe("Import Single Dashboard and Verify", () => {
+describe("Import Single Dashboard", () => {
   const downloadDirectory = Cypress.env("downloadDir");
   const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
   const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
