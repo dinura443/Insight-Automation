@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Unset variable 
+      - name: Unset variable
         run: npm run unset
 
       - name: Set env variables from input
@@ -60,8 +60,6 @@ jobs:
             echo "Invalid mode selected."
             exit 1
           fi
-
-
 
       - name: Create SSH key
         run: |
@@ -104,10 +102,10 @@ jobs:
           echo "Uploading ${{ env.BACKUP_NAME }} to server..."
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
-            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/cypress-backups/backups
+            AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups
 
       - name: Remove files older than 24 hours on server
         run: |
           ssh -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
-            'find /home/${{ secrets.REMOTE_USER }}/cypress-backups/backups -type f -mmin +1440 -exec rm -f {} \;'
+            AccumeticUser@34.71.130.138 \
+            'find /home/AccumeticUser/cypress-backups/backups -type f -mmin +1440 -exec rm -f {} \;'
