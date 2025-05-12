@@ -2,7 +2,15 @@ export class Chart {
     chartPageBtn = "(//a[normalize-space()='Charts'])[1]";
     bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
     exportButton = "//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
-
+    importButtonSelector = "(//button[@class='antd5-btn css-7kui6y antd5-btn-link antd5-btn-color-primary antd5-btn-variant-link superset-button superset-button-link css-1ckc79t'])[1]";
+    selectFileInputSelector = "#modelFile";
+    importbutton = "(//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq'])[1]";
+    itemNameSelector = "td a";
+    menuItemSelector = "(//button[@aria-label='Menu actions trigger'])";
+    viewquerySelector = "//body//div//li[10]";
+    copyquerySelector = "(//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-undefined css-1s3j1k9'])[1]";
+   TypeinsertSelector = "(//span[@class='ant-input-affix-wrapper css-1ij993o'])[1]";
+   sqlEditorSelector = "//div[@class='ace_content']";
     visitChartPage(): void {
         cy.log("Navigating to the chart page...");
         cy.xpath(this.chartPageBtn).click();
@@ -15,7 +23,42 @@ export class Chart {
             .should('exist')
             .and('be.visible')
             .click();
+
     }
+
+
+
+    
+    findRowByItemName(itemName: string) {
+        cy.log(`Searching for item name (exact match): "${itemName}"`);
+      
+        return cy.get("td a").filter((index, el) => {
+          return el.textContent?.trim() === itemName;
+        }).first().closest("tr");
+      }
+
+      clickItemName(itemName: string) {
+        cy.log(`Clicking on item name: "${itemName}"`);
+        cy.contains(this.itemNameSelector, itemName, { timeout: 10000 })
+          .should('exist')
+          .and('be.visible')
+          .click({ force: true });
+        cy.log(`Successfully clicked on item name: "${itemName}"`);
+      }
+
+    uploadSpecificFile(relativeFilePath: string) {
+        cy.xpath(this.importButtonSelector, { timeout: 10000 })
+          .should('exist')
+          .and('be.visible')
+          .then(($button) => {
+            cy.wrap($button).click({ force: true });
+          });
+      
+        // ✅ Use relative path directly with attachFile()
+        cy.get(this.selectFileInputSelector).attachFile({ filePath: relativeFilePath });
+      
+        cy.xpath(this.importbutton, { timeout: 10000 }).should("be.visible").click({ timeout: 5000 });
+      }
 
     bulkExportChart(chartNames: string[]): void {
         cy.log(`Starting bulk export for ${chartNames.length} Charts`);
@@ -67,4 +110,8 @@ export class Chart {
                 cy.wait(5000);
             });
     }
+
 }
+
+
+

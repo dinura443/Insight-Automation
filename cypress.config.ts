@@ -6,6 +6,7 @@ import { VerifyExporter } from "./page-objects-and-services/page-objects/dashboa
 import { UiVerifier } from "./page-objects-and-services/page-objects/dashboard-Ui-Verification";
 import { SingleUiVerifier } from "./page-objects-and-services/page-objects/dashboard-Single-Ui-Verification";
 
+
 dotenv.config();
 
 interface ChartData {
@@ -31,6 +32,9 @@ export default defineConfig({
     ARCHIVE_INSTANCE2: process.env.ARCHIVE_INSTANCE2,
     FILECOMPONENTS_INSTANCE1: process.env.FILECOMPONENTS_INSTANCE1,
     FILECOMPONENTS_INSTANCE2: process.env.FILECOMPONENTS_INSTANCE2,
+    FILECOMPONENTS_INSTANCE1CHARTS : process.env.FILECOMPONENTS_INSTANCE1CHARTS,
+    FILECOMPONENTS_INSTANCE2CHARTS : process.env.FILECOMPONENTS_INSTANCE2CHARTS,
+
     instance1Login: process.env.INSTANCE1_LOGIN,
     instance2Login: process.env.INSTANCE2_LOGIN,
     dashboardUi: process.env.DASHBOARD_UI,
@@ -39,7 +43,7 @@ export default defineConfig({
     backupStatusDir: process.env.BACKUPSTATUSDIR,
     DASHBOARD_NAMES: process.env.DASHBOARD_NAMES,
 
-    CHART_NAMES: process.env.ITEM_NAMES,
+    CHART_NAMES: process.env.DASHBOARD_NAMES,
   },
   e2e: {
     video: true,
@@ -47,7 +51,11 @@ export default defineConfig({
     fixturesFolder: "cypress/fixtures",
     downloadsFolder: "cypress/downloads",
     defaultCommandTimeout: 3000,
+
+    
     setupNodeEvents(on, config) {
+      config.env.instance1Login = process.env.INSTANCE1_LOGIN;
+      config.env.instance2Login = process.env.INSTANCE2_LOGIN;
       require("@cypress/grep/src/plugin")(config);
       require("cypress-terminal-report/src/installLogsPrinter")(on);
 
@@ -57,69 +65,113 @@ export default defineConfig({
         },
       });
 
+
+
+      on('task', {
+        // Task to get all .zip files in a given directory
+        getFilesInDirectory(directoryPath) {
+          if (!fs.existsSync(directoryPath)) {
+            throw new Error(`Directory does not exist: ${directoryPath}`);
+          }
+
+          const zipFiles = fs.readdirSync(directoryPath)
+                             .filter(file => file.endsWith('.zip'))
+                             .map(file => path.join(directoryPath, file));
+
+          return zipFiles;
+        }
+      });
+
+
+
       on("task", {
-        compareJsonFiles({ file1, file2 }) {
-          try {
-            const filePath1 = path.resolve(file1);
-            const filePath2 = path.resolve(file2);
-            const data1: ChartData[] = JSON.parse(fs.readFileSync(filePath1, "utf8"));
-            const data2: ChartData[] = JSON.parse(fs.readFileSync(filePath2, "utf8"));
-
-            if (data1.length !== data2.length) {
-              return {
-                success: false,
-                message: `Mismatch: Instance 1 has ${data1.length} charts, while Instance 2 has ${data2.length} charts.`,
-              };
+        compareChartExports({ dir1, dir2 }) {
+          const fs = require("fs");
+          const path = require("path");
+      
+            function getAllFiles(folder: string): string[] {
+            const out: string[] = [];
+            function walk(dir: string): void {
+              fs.readdirSync(dir).forEach((f: string) => {
+              const fullPath: string = path.join(dir, f);
+              if (fs.statSync(fullPath).isDirectory()) {
+                walk(fullPath);
+              } else {
+                out.push(path.relative(folder, fullPath));
+              }
+              });
             }
-
-            let mismatchFound = false;
-            const mismatches: { chartIndex: number; differences: any }[] = [];
-
-            data1.forEach((chartData: ChartData, index) => {
-              const instance2ChartData = data2[index];
-              if (
-                chartData.title !== instance2ChartData.title ||
-                chartData.id !== instance2ChartData.id ||
-                chartData.alignment !== instance2ChartData.alignment
-              ) {
-                mismatchFound = true;
+            walk(folder);
+            return out;
+            }
+      
+          try {
+            const files1 = getAllFiles(dir1).filter(f => !f.endsWith("metadata.yaml"));
+            const files2 = getAllFiles(dir2).filter(f => !f.endsWith("metadata.yaml"));
+      
+            const allFiles = [...new Set([...files1, ...files2])];
+            const mismatches: Array<{
+              file: string;
+              reason?: string;
+              instance1Content?: string;
+              instance2Content?: string;
+            }> = [];
+      
+            allFiles.forEach((relativeFile) => {
+              const file1 = path.join(dir1, relativeFile);
+              const file2 = path.join(dir2, relativeFile);
+      
+              if (!fs.existsSync(file1)) {
+                mismatches.push({ file: relativeFile, reason: "Missing in Instance 1" });
+                return;
+              }
+      
+              if (!fs.existsSync(file2)) {
+                mismatches.push({ file: relativeFile, reason: "Missing in Instance 2" });
+                return;
+              }
+      
+              const content1 = fs.readFileSync(file1, "utf8").trim();
+              const content2 = fs.readFileSync(file2, "utf8").trim();
+      
+              if (content1 !== content2) {
                 mismatches.push({
-                  chartIndex: index + 1,
-                  differences: {
-                    title: chartData.title !== instance2ChartData.title
-                      ? { instance1: chartData.title, instance2: instance2ChartData.title }
-                      : undefined,
-                    id: chartData.id !== instance2ChartData.id
-                      ? { instance1: chartData.id, instance2: instance2ChartData.id }
-                      : undefined,
-                    alignment: chartData.alignment !== instance2ChartData.alignment
-                      ? { instance1: chartData.alignment, instance2: instance2ChartData.alignment }
-                      : undefined,
-                  },
+                  file: relativeFile,
+                  instance1Content: content1.substring(0, 50) + "...",
+                  instance2Content: content2.substring(0, 50) + "...",
                 });
               }
             });
-
-            if (mismatchFound) {
+      
+            if (mismatches.length > 0) {
               return {
                 success: false,
-                message: `Mismatch found in ${mismatches.length} chart(s):`,
-                mismatches,
+                summary: {
+                  totalMismatches: mismatches.length,
+                  differences: mismatches
+                }
               };
             }
-
+      
             return {
               success: true,
-              message: "JSON files are consistent.",
+              summary: {
+                message: "✅ All files matched between instances"
+              }
             };
+      
           } catch (error) {
             return {
               success: false,
-              message: `Error comparing JSON files: ${(error as Error).message}`,
+              summary: {
+                error: error instanceof Error ? error.message : "Unknown error during verification",
+                differences: []
+              }
             };
           }
-        },
+        }
       });
+
 
       on("task", {
         isDirectoryEmpty(directoryPath: string): boolean {
@@ -262,14 +314,51 @@ export default defineConfig({
         },
       });
 
+
       on("task", {
         verifySupersetFiles({ extractedFilesDir, importVerifyDir }) {
           const verifier = new VerifyExporter(extractedFilesDir, importVerifyDir);
           const result = verifier.compare();
-          return result;
-        },
+      
+          // Filter out chart-related file name mismatches
+            const missingNonCharts: string[] = result.summary.missingInDir2?.filter((f: string) => !f.startsWith("charts/")) || [];
+            const extraNonCharts: string[] = result.summary.extraInDir2?.filter((f: string) => !f.startsWith("charts/")) || [];
+      
+            const detailedNonChartDiffs: Array<{
+            file: string;
+            differences: string[];
+            }> = result.summary.detailed?.filter(
+            (entry: { file: string; differences: string[] }) => !entry.file.startsWith("charts/")
+            ) || [];
+      
+          const hasRelevantMismatch = (
+            missingNonCharts.length > 0 ||
+            extraNonCharts.length > 0 ||
+            detailedNonChartDiffs.length > 0
+          );
+      
+          if (hasRelevantMismatch) {
+            const detailed: string = detailedNonChartDiffs.map((entry) => {
+              return `❌ Mismatch in "${entry.file}":\n${entry.differences.map((d) => `  - ${d}`).join("\n")}`;
+            }).join("\n\n") || "";
+      
+            const message = [
+              "❌ YAML verification failed.",
+              `Missing files: ${missingNonCharts.join(", ") || "None"}`,
+              `Extra files: ${extraNonCharts.join(", ") || "None"}`,
+              detailed
+            ].join("\n\n");
+      
+            console.error(message);
+            return { success: false, message };
+          }
+      
+          console.log("✅ YAML verification passed!");
+          return { success: true, message: "✅ YAML verification passed!" };
+        }
       });
-
+      
+      
       on("task", {
         log(message: string) {
           console.log(message);

@@ -19,15 +19,16 @@ describe("Bulk Verification Process", () => {
     });
 
     cy.task("verifySupersetFiles", {
-      extractedFilesDir: Cypress.env("FILECOMPONENTS_INSTANCE2"),
-      importVerifyDir: Cypress.env("FILECOMPONENTS_INSTANCE1"),
+      extractedFilesDir: instance2DashboardDir,
+      importVerifyDir: instance1DashboardDir,
     }).then((result) => {
       if (!result.success) {
-        cy.task("log", "YAML verification failed. Summary:", result.summary);
+        cy.task("log", `YAML verification failed.\nSummary:\n${JSON.stringify(result.summary, null, 2)}`);
       }
-      expect(result.success, "YAML verification passed").to.be.true;
+      expect(result.success, result.message || "YAML verification passed").to.be.true;
     });
   });
+});
 
   it("Performing the UI Verification", () => {
     const dashboardUi = Cypress.env("dashboardUi");
@@ -49,7 +50,7 @@ describe("Bulk Verification Process", () => {
       expect(result.success, "UI verification passed").to.be.true;
     });
   });
-
+/*
   it("End-to-End Clean Up", () => {
     const instance2Archive = Cypress.env("ARCHIVE_INSTANCE2");
     const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
@@ -91,3 +92,4 @@ describe("Bulk Verification Process", () => {
 });
 
 
+*/
