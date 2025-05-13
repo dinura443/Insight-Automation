@@ -87,14 +87,12 @@ jobs:
           fi
           echo "Latest backup: $BACKUP_NAME"
           echo "BACKUP_NAME=$BACKUP_NAME" >> $GITHUB_ENV
-
-      - name: Upload backup to server
+      - name: Upload dashboard backup to server
         run: |
-          echo "Uploading ${{ env.BACKUP_NAME }}"
+          echo " Uploading ${{ env.BACKUP_NAME }} to server..."
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            ${{ env.BACKUP_NAME }} \
+            cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
             AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups
-
       - name: Remove files older than 24 hours on server
         run: |
           ssh -o StrictHostKeyChecking=no -i AccumeticKey.pem \
