@@ -1,7 +1,9 @@
 describe("Bulk Verification Process", () => {
-  it("Performing the file verification", () => {
+  it("Performs YAML and UI verifications", () => {
     const instance1DashboardDir = Cypress.env("FILECOMPONENTS_INSTANCE1");
     const instance2DashboardDir = Cypress.env("FILECOMPONENTS_INSTANCE2");
+    const dashboardUi = Cypress.env("dashboardUi");
+    const itemName = Cypress.env("DASHBOARD_NAMES");
 
     cy.log(`Comparing extracted files directory: ${instance1DashboardDir}`);
     cy.log(`With imported files directory: ${instance2DashboardDir}`);
@@ -21,35 +23,32 @@ describe("Bulk Verification Process", () => {
     cy.task("verifySupersetFiles", {
       extractedFilesDir: instance2DashboardDir,
       importVerifyDir: instance1DashboardDir,
-    }).then((result) => {
-      if (!result.success) {
-        cy.task("log", `YAML verification failed.\nSummary:\n${JSON.stringify(result.summary, null, 2)}`);
+    }).then((yamlResult) => {
+      if (!yamlResult.success) {
+        cy.task("log", `YAML verification failed.\nSummary:\n${JSON.stringify(yamlResult.summary, null, 2)}`);
       }
-      expect(result.success, result.message || "YAML verification passed").to.be.true;
+      expect(yamlResult.success, yamlResult.message || "YAML verification passed").to.be.true;
+
+      // Only continue with UI verification if YAML passes
+      cy.log(`Comparing chart data for item: ${itemName}`);
+      cy.log(`Data path: ${dashboardUi}`);
+
+      cy.task("verifyUiContents", {
+        dashboardUi,
+        itemName,
+      }).then((uiResult) => {
+        if (!uiResult.success) {
+          cy.task("log", "UI verification failed. Summary:", uiResult.summary);
+          uiResult.summary.differences.forEach((diff) => {
+            cy.task("log", diff);
+          });
+        }
+        expect(uiResult.success, "UI verification passed").to.be.true;
+      });
     });
   });
 });
 
-  it("Performing the UI Verification", () => {
-    const dashboardUi = Cypress.env("dashboardUi");
-    const itemName = Cypress.env("DASHBOARD_NAMES");
-
-    cy.log(`Comparing chart data for item: ${itemName}`);
-    cy.log(`Data path: ${dashboardUi}`);
-
-    cy.task("verifyUiContents", {
-      dashboardUi,
-      itemName,
-    }).then((result) => {
-      if (!result.success) {
-        cy.task("log", "UI verification failed. Summary:", result.summary);
-        result.summary.differences.forEach((diff) => {
-          cy.task("log", diff);
-        });
-      }
-      expect(result.success, "UI verification passed").to.be.true;
-    });
-  });
 /*
   it("End-to-End Clean Up", () => {
     const instance2Archive = Cypress.env("ARCHIVE_INSTANCE2");

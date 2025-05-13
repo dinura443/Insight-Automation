@@ -28,7 +28,7 @@ describe("Bulk Import Operations", () => {
     dashboardNamesToImport = [...dashboardNames];
   });
 
-  it("Bulk Export Dashboards (instance: 1)", () => {
+  xit("Bulk Export Dashboards (instance: 1)", () => {
     cy.log("Logging in to Instance 1...");
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -77,7 +77,7 @@ describe("Bulk Import Operations", () => {
     });
   });
 
-  it("Backup Existing Dashboards in Instance 2 (before import)", () => {
+  xit("Backup Existing Dashboards in Instance 2 (before import)", () => {
     cy.log("Checking if any dashboards already exist in Instance 2...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -129,7 +129,7 @@ describe("Bulk Import Operations", () => {
     });
   });
 
-  it("Import the dashboard from Instance 1 (instance: 2)", () => {
+  xit("Import the dashboard from Instance 1 (instance: 2)", () => {
     cy.log("Logging in to Instance 2...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));

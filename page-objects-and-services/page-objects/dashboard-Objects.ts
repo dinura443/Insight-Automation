@@ -182,12 +182,15 @@ export class DashBoard {
 
   clickItemName(itemName: string) {
     cy.log(`Clicking on item name: "${itemName}"`);
-    cy.contains(this.itemNameSelector, itemName, { timeout: 10000 })
-      .should('exist')
-      .and('be.visible')
+    cy.get(this.itemNameSelector, { timeout: 10000 })
+      .filter((index, el) => el.textContent?.trim() === itemName)
+      .should('have.length.greaterThan', 0)
+      .first()
+      .scrollIntoView()
       .click({ force: true });
     cy.log(`Successfully clicked on item name: "${itemName}"`);
   }
+  
 
   clickShareButtonForRow(itemName: string) {
     this.findRowByItemName(itemName)
