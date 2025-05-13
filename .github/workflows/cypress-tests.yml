@@ -4,22 +4,16 @@ on:
       mode:
         type: choice
         options:
-          - dashboard-single
-          - dashboard-bulk
+          - dashboard
           - charts
           - datasets
-        description: "Choose what to import: single dashboard, bulk dashboards, charts, or datasets"
+        description: "Choose what to import: dashboard, charts or datasets"
         required: true
 
-      dashboard_name:
+      item_names:
         type: string
-        description: "Dashboard name (for single mode)"
-        required: false
-
-      item_list:
-        type: string
-        description: "Comma-separated list of items (dashboards, charts, or datasets)"
-        required: false
+        description: "Enter chart/dashboard/dataset name(s) — use comma to separate multiple items"
+        required: true
 
 jobs:
   build:
@@ -43,47 +37,14 @@ jobs:
       - name: Set env variables from input
         run: |
           echo "MODE=${{ github.event.inputs.mode }}" >> $GITHUB_ENV
+          
+          # Save item names directly
+          echo "ITEM_NAMES=${{ github.event.inputs.item_names }}" >> $GITHUB_ENV
 
-          if [[ "${{ github.event.inputs.mode }}" == "dashboard-single" ]]; then
-            if [[ -z "${{ github.event.inputs.dashboard_name }}" ]]; then
-              echo "Error: Dashboard name is required in single mode."
-              exit 1
-            fi
-            echo "ITEM_NAME=${{ github.event.inputs.dashboard_name }}" >> $GITHUB_ENV
-            echo "✅ Running in 'dashboard-single' mode"
-            echo "🎯 Dashboard Name: ${{ github.event.inputs.dashboard_name }}"
+          # Log what we’re doing
+          echo "✅ Running in '$MODE' mode"
+          echo "🎯 Items to import: ${ITEM_NAMES}"
 
-          elif [[ "${{ github.event.inputs.mode }}" == "dashboard-bulk" ]]; then
-            if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
-              echo "Error: Item list is required in bulk dashboard mode."
-              exit 1
-            fi
-            echo "ITEM_NAME=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
-            echo "✅ Running in 'dashboard-bulk' mode"
-            echo "🎯 Dashboard List: ${{ github.event.inputs.item_list }}"
-
-          elif [[ "${{ github.event.inputs.mode }}" == "charts" ]]; then
-            if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
-              echo "Error: Item list is required for charts mode."
-              exit 1
-            fi
-            echo "ITEM_NAME=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
-            echo "✅ Running in 'charts' mode"
-            echo "🎯 Chart List: ${{ github.event.inputs.item_list }}"
-
-          elif [[ "${{ github.event.inputs.mode }}" == "datasets" ]]; then
-            if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
-              echo "Error: Item list is required for datasets mode."
-              exit 1
-            fi
-            echo "ITEM_NAME=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
-            echo "✅ Running in 'datasets' mode"
-            echo "🎯 Dataset List: ${{ github.event.inputs.item_list }}"
-
-          else
-            echo "❌ Invalid mode selected."
-            exit 1
-          fi
       - name: Create SSH key
         run: |
           echo "$SSH_PRIVATE_KEY" > AccumeticKey.pem
@@ -94,48 +55,39 @@ jobs:
       - name: Run Relevant Cypress Tests
         run: |
           MODE="${{ env.MODE }}"
+          ITEM_NAMES="${{ env.ITEM_NAMES }}"
 
-          if [ "$MODE" = "dashboard-single" ]; then
-            echo " Running tests for single dashboard..."
-            npx cypress run --spec "cypress/e2e/dashboard-Single-Import-Operations.cy.js"
-            npx cypress run --spec "cypress/e2e/dashboard-Single-Verification-Operations.cy.js"
+          IFS=',' read -r -a ITEM_ARRAY <<< "$ITEM_NAMES"
+          echo "📋 You are importing: ${ITEM_ARRAY[@]}"
 
-          elif [ "$MODE" = "dashboard-bulk" ]; then
-            echo "Running tests for bulk dashboards..."
-            npx cypress run --spec "cypress/e2e/dashboard-Bulk-Import-Operations.cy.js" || true
-            npx cypress run --spec "cypress/e2e/dashboard-Bulk-Verification-Operations.cy.js" || true
+          if [ "$MODE" == "dashboard" ]; then
+            npx cypress run --spec "cypress/e2e/dashboard-Bulk-Import-Operations.cy.js"
+            npx cypress run --spec "cypress/e2e/dashboard-Bulk-Verification-Operations.cy.js"
 
-          elif [ "$MODE" = "charts" ]; then
-            echo " Running tests for charts..."
+          elif [ "$MODE" == "charts" ]; then
             npx cypress run --spec "cypress/e2e/chart-Import-Operations.cy.js"
             npx cypress run --spec "cypress/e2e/chart-Verification-Operation.cy.js"
 
-          elif [ "$MODE" = "datasets" ]; then
-            echo " Running tests for datasets..."
+          elif [ "$MODE" == "datasets" ]; then
             npx cypress run --spec "cypress/e2e/dataset-Import-Operations.cy.js"
             npx cypress run --spec "cypress/e2e/dataset-Verification-Operation.cy.js"
 
           else
-            echo " Unknown mode: $MODE"
+            echo "❌ Unknown mode: $MODE"
             exit 1
           fi
 
       - name: Get backup filename
         id: get_name
         run: |
-          BACKUP_NAME=$(ls cypress/fixtures/backups/pre-import | grep .zip | sort | tail -n 1)
-          if [ -z "$BACKUP_NAME" ]; then
-            echo "No backup file found in directory."
-            exit 1
-          fi
-          echo "Latest backup: $BACKUP_NAME"
+          BACKUP_NAME=$(ls cypress/fixtures/backups/pre-import/*.zip | sort | tail -n 1)
           echo "BACKUP_NAME=$BACKUP_NAME" >> $GITHUB_ENV
 
-      - name: Upload dashboard backup to server
+      - name: Upload backup to server
         run: |
-          echo " Uploading ${{ env.BACKUP_NAME }} to server..."
+          echo "📤 Uploading ${{ env.BACKUP_NAME }}"
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
+            ${{ env.BACKUP_NAME }} \
             AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups
 
       - name: Remove files older than 24 hours on server

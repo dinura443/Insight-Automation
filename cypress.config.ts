@@ -8,6 +8,8 @@ import { SingleUiVerifier } from "./page-objects-and-services/page-objects/dashb
 import { FolderStructureVerifier } from "./page-objects-and-services/page-objects/chart-File-Verification";
 import { DatasetStructureVerifier } from "./page-objects-and-services/page-objects/dataset-File-Verification";
 const unzipper = require("unzipper");
+const axios = require("axios");
+const FormData = require("form-data");
 
 dotenv.config();
 
@@ -69,6 +71,44 @@ export default defineConfig({
 
 
 
+      on("task", {
+        importDashboardViaApi({ filePath, supersetUrl, sessionCookie }) {
+          const form = new FormData();
+          form.append("formData", fs.createReadStream(filePath));
+
+          return fetch(`${supersetUrl}/api/v1/dashboard/import/`, {
+            method: "POST",
+            headers: {
+              Cookie: `session=${sessionCookie}`,
+              ...form.getHeaders(),
+            },
+            body: form,
+          })
+            .then(async (res) => {
+              const result = await res.text();
+              return { status: res.status, body: result };
+            })
+            .catch((error) => {
+              console.error("Import error:", error);
+              throw error;
+            });
+        },
+
+        getLatestFile(directoryPath) {
+          const files = fs.readdirSync(directoryPath)
+            .map(file => ({
+              file,
+              time: fs.statSync(path.join(directoryPath, file)).mtime.getTime()
+            }))
+            .sort((a, b) => b.time - a.time);
+
+          if (files.length === 0) return null;
+          return path.join(directoryPath, files[0].file);
+        }
+      });
+
+
+      
 
         // Register custom tasks
         on("task", {
