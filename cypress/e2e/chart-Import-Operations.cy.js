@@ -168,7 +168,7 @@ describe("Backup charts from Instance 2", () => {
           }
 
           cy.writeFile(
-            `cypress/fixtures/backups/pre-import/charts/${chartName.replace(/\s+/g, "_")}_backup.zip`,
+            `cypress/fixtures/backups/pre-import/${chartName.replace(/\s+/g, "_")}_backup.zip`,
             exportRes.body,
             { encoding: "binary" }
           );
