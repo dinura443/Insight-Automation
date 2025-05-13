@@ -44,10 +44,10 @@ export default defineConfig({
     backupDir: process.env.BACKUP,
     rootDir: process.env.ROOT_DIR,
     backupStatusDir: process.env.BACKUPSTATUSDIR,
-    DASHBOARD_NAMES: process.env.ITEM_NAME,
-    DATASET_NAMES: process.env.ITEM_NAME,
-    CHART_NAMES: process.env.ITEM_NAME,
-    ITEM_NAME : process.env.ITEM_NAME
+    DASHBOARD_NAMES: process.env.ITEM_NAMES,
+    DATASET_NAMES: process.env.ITEM_NAMES,
+    CHART_NAMES: process.env.ITEM_NAMES,
+    ITEM_NAMES : process.env.ITEM_NAMES
   },
   e2e: {
     video: true,

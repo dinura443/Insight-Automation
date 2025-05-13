@@ -8,7 +8,7 @@ const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
 
 
-  const envList = Cypress.env("ITEM_NAME");
+  const envList = Cypress.env("ITEM_NAMES");
   if (!envList || typeof envList !== "string") {
     throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
   }
@@ -37,7 +37,7 @@ describe("Export dashboards from the 1st instance", () => {
       this.sessionCookie = session.value;
     });
 
-    this.DASHBOARD_NAMES = Cypress.env("ITEM_NAME")
+    this.DASHBOARD_NAMES = Cypress.env("ITEM_NAMES")
       .split(",")
       .map((name) => name.trim());
   });
@@ -124,7 +124,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
 
   it("Should back up and delete matching dashboards before import", function () {
     const supersetUrl = Cypress.env("instance2Login");
-    const dashboardNamesToImport = Cypress.env("ITEM_NAME")
+    const dashboardNamesToImport = Cypress.env("ITEM_NAMES")
       .split(",")
       .map((name) => name.trim());
 
@@ -262,7 +262,7 @@ describe("Export dashboards from the 2nd instance for verification", () => {
       this.sessionCookie = session.value;
     });
 
-    this.DASHBOARD_NAMES = Cypress.env("ITEM_NAME")
+    this.DASHBOARD_NAMES = Cypress.env("ITEM_NAMES")
       .split(",")
       .map((name) => name.trim());
   });
