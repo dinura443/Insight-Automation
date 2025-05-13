@@ -2,12 +2,12 @@ import { defineConfig } from "cypress";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
-import * as unzipper from "unzipper";
 import { VerifyExporter } from "./page-objects-and-services/page-objects/dashboard-File-Verification";
 import { UiVerifier } from "./page-objects-and-services/page-objects/dashboard-Ui-Verification";
 import { SingleUiVerifier } from "./page-objects-and-services/page-objects/dashboard-Single-Ui-Verification";
 import { FolderStructureVerifier } from "./page-objects-and-services/page-objects/chart-File-Verification";
 import { DatasetStructureVerifier } from "./page-objects-and-services/page-objects/dataset-File-Verification";
+const unzipper = require("unzipper");
 
 dotenv.config();
 
@@ -68,6 +68,56 @@ export default defineConfig({
 
 
 
+
+
+        // Register custom tasks
+        on("task", {
+          // Returns all .zip file paths in a given directory
+          getFilesInDirectory(dirPath) {
+            try {
+              return fs
+                .readdirSync(dirPath)
+                .filter((file) => file.endsWith(".zip"))
+                .map((file) => path.join(dirPath, file));
+            } catch (err) {
+              throw new Error(`Error reading directory: ${dirPath} - ${(err as Error).message}`);
+            }
+          },
+  
+          // Unzips a given ZIP file into the specified directory
+          unzipFile({ zipPath, extractDir }) {
+            return new Promise((resolve, reject) => {
+              interface UnzipFileResult {
+                success: boolean;
+                message: string;
+                error?: string;
+              }
+
+              interface UnzipFileParams {
+                zipPath: string;
+                extractDir: string;
+              }
+
+              fs.createReadStream((zipPath as UnzipFileParams["zipPath"]))
+                .pipe(unzipper.Extract({ path: (extractDir as UnzipFileParams["extractDir"]) }))
+                .on("close", () => {
+                  resolve({ success: true, message: `Extracted ${zipPath} to ${extractDir}` } as UnzipFileResult);
+                })
+                .on("error", (err: Error) => {
+                  reject({ success: false, message: `Failed to unzip ${zipPath}`, error: err.message } as UnzipFileResult);
+                });
+            });
+          },
+  
+          // Lists all files/folders in a directory
+          listDirectoryContents(dirPath) {
+            try {
+              return fs.readdirSync(dirPath);
+            } catch (err) {
+              throw new Error(`Error listing contents of ${dirPath} - ${(err as Error).message}`);
+            }
+          }
+        });
 
       on("task", {
         verifyDatasetExportStructure({ dir1, dir2 }) {
@@ -452,31 +502,7 @@ export default defineConfig({
           return result;
         },
       });
-      on("task", {
-        getFilesInDirectory(dirPath) {
-            return fs.readdirSync(dirPath)
-                .filter(file => file.endsWith(".zip"))
-                .map(file => path.join(dirPath, file));
-        },
 
-        unzipFile({ zipPath, extractDir }) {
-            return new Promise((resolve, reject) => {
-                fs.createReadStream(zipPath)
-                    .pipe(unzipper.Extract({ path: extractDir }))
-                    .on("close", () => {
-                        resolve({ success: true, message: `Extracted ${zipPath} to ${extractDir}` });
-                    })
-                    .on("error", (err) => {
-                        reject({ success: false, message: `Failed to unzip ${zipPath}`, error: err });
-                    });
-            });
-        },
-
-        listDirectoryContents(dirPath) {
-            return fs.readdirSync(dirPath);
-        }
-    });
-    
 
       on("task", {
         verifySingleImportUiContents({ dashboardUi, itemName }) {
