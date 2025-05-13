@@ -49,7 +49,7 @@ jobs:
               echo "Error: Dashboard name is required in single mode."
               exit 1
             fi
-            echo "DASHBOARD_NAMES=${{ github.event.inputs.dashboard_name }}" >> $GITHUB_ENV
+            echo "ITEM_NAME=${{ github.event.inputs.dashboard_name }}" >> $GITHUB_ENV
             echo "✅ Running in 'dashboard-single' mode"
             echo "🎯 Dashboard Name: ${{ github.event.inputs.dashboard_name }}"
 
@@ -58,7 +58,7 @@ jobs:
               echo "Error: Item list is required in bulk dashboard mode."
               exit 1
             fi
-            echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+            echo "ITEM_NAME=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
             echo "✅ Running in 'dashboard-bulk' mode"
             echo "🎯 Dashboard List: ${{ github.event.inputs.item_list }}"
 
@@ -67,7 +67,7 @@ jobs:
               echo "Error: Item list is required for charts mode."
               exit 1
             fi
-            echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+            echo "ITEM_NAME=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
             echo "✅ Running in 'charts' mode"
             echo "🎯 Chart List: ${{ github.event.inputs.item_list }}"
 
@@ -76,7 +76,7 @@ jobs:
               echo "Error: Item list is required for datasets mode."
               exit 1
             fi
-            echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+            echo "ITEM_NAME=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
             echo "✅ Running in 'datasets' mode"
             echo "🎯 Dataset List: ${{ github.event.inputs.item_list }}"
 
