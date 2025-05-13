@@ -6,17 +6,10 @@ const dashboard = new DashBoard();
 const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
 const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
-
-
-  const envList = Cypress.env("ITEM_NAMES");
-  if (!envList || typeof envList !== "string") {
-    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
-  }
-  dashboardNames = envList.split(",").map((name) => name.trim());
-
 let dashboardNames = [];
 
 
+  
 describe("Export dashboards from the 1st instance", () => {
   before(() => {
     login.visitInstance1();
@@ -342,6 +335,15 @@ describe("Export dashboards from the 2nd instance for verification", () => {
 describe("Scrape dashboard details from selected dashboards ", () => {
 
 
+  before(() => {
+    const envList = Cypress.env("ITEM_NAMES");
+  if (!envList || typeof envList !== "string") {
+    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
+  }
+  dashboardNames = envList.split(",").map((name) => name.trim());
+  });
+
+
 
   it("Scrape dashboard details from all dashboards from the instance1", () => {
     cy.log("Logging in to Instance 1...");
@@ -394,7 +396,18 @@ describe("Scrape dashboard details from selected dashboards ", () => {
     cy.log("Scraping all dashboard details completed successfully.");
   });
 
+});
 
+describe("Scrape dashboard details from selected dashboards ", () => {
+
+
+  before(() => {
+    const envList = Cypress.env("ITEM_NAMES");
+  if (!envList || typeof envList !== "string") {
+    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
+  }
+  dashboardNames = envList.split(",").map((name) => name.trim());
+  });
   it("Scrape dashboard details from all dashboards from the instance 2", () => {
     cy.log("Logging in to Instance 2...");
     login.visitInstance2();
@@ -447,7 +460,9 @@ describe("Scrape dashboard details from selected dashboards ", () => {
   });
 });
 
+
 describe("Verify dashboard details from Instance 1 and Instance 2", () => {
+
 
 
   it("Verify that dashboard data from instance1 matches instance2", () => {
