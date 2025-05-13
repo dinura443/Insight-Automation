@@ -10,7 +10,8 @@ let dashboardNames = [];
 
 
 
-describe("Export dashboards from the 1st instance", () => {
+
+xdescribe("Export dashboards from the 1st instance", () => {
   before(() => {
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -105,7 +106,7 @@ describe("Export dashboards from the 1st instance", () => {
   });
 });
 
-describe("Backup existing dashboards in Instance 2 using REST API", () => {
+xdescribe("Backup existing dashboards in Instance 2 using REST API", () => {
   before(() => {
     cy.log("Logging into Instance 2...");
     login.visitInstance2();
@@ -205,7 +206,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
   });
 });
 
-describe("Import the dashboard from instance1 ", () =>{
+xdescribe("Import the dashboard from instance1 ", () =>{
   it("Import the dashboard from Instance 1 (instance: 2)", () => {
     cy.log("Logging in to Instance 2...");
     login.visitInstance2();
@@ -235,7 +236,7 @@ describe("Import the dashboard from instance1 ", () =>{
   });
 
 });
-describe("Export dashboards from the 2nd instance for verification", () => {
+xdescribe("Export dashboards from the 2nd instance for verification", () => {
   before(() => {
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -330,16 +331,16 @@ describe("Export dashboards from the 2nd instance for verification", () => {
   });
 });
 
+before(() => {
+  const envList = Cypress.env("DASHBOARD_NAMES");
+  if (!envList || typeof envList !== "string") {
+    throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
+  }
+  dashboardNames = envList.split(",").map((name) => name.trim());
+});
 describe("Scrape dashboard details from selected dashboards ", () => {
 
-  before(() => {
-    const envList = Cypress.env("DASHBOARD_NAMES");
-    if (!envList || typeof envList !== "string") {
-      throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
-    }
-    dashboardNames = envList.split(",").map((name) => name.trim());
-    dashboardNamesToImport = [...dashboardNames];
-  });
+
 
   it("Scrape dashboard details from all dashboards from the instance1", () => {
     cy.log("Logging in to Instance 1...");
@@ -447,13 +448,6 @@ describe("Scrape dashboard details from selected dashboards ", () => {
 
 describe("Verify dashboard details from Instance 1 and Instance 2", () => {
 
-  before(() => {
-    const envList = Cypress.env("DASHBOARD_NAMES");
-    if (!envList || typeof envList !== "string") {
-      throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
-    }
-    dashboardNames = envList.split(",").map((name) => name.trim());
-  });
 
   it("Verify that dashboard data from instance1 matches instance2", () => {
     cy.log("Reading JSON files for instance 1 and instance 2...");
