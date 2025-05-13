@@ -80,7 +80,12 @@ jobs:
       - name: Get backup filename
         id: get_name
         run: |
-          BACKUP_NAME=$(ls cypress/fixtures/backups/pre-import/*.zip | sort | tail -n 1)
+          BACKUP_NAME=$(ls cypress/fixtures/backups/pre-import | grep .zip | sort | tail -n 1)
+          if [ -z "$BACKUP_NAME" ]; then
+            echo "No backup file found in directory."
+            exit 1
+          fi
+          echo "Latest backup: $BACKUP_NAME"
           echo "BACKUP_NAME=$BACKUP_NAME" >> $GITHUB_ENV
 
       - name: Upload backup to server
