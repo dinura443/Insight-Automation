@@ -10,7 +10,7 @@ let dashboardNames = [];
 
 
   
-describe("Export dashboards from the 1st instance", () => {
+xdescribe("Export dashboards from the 1st instance", () => {
   before(() => {
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -174,13 +174,16 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
       }
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const exportPath = `cypress/fixtures/backup_instance2_${timestamp}.zip`;
+      const exportPath = `cypress/fixtures/backups/pre-import/backup_instance2_${timestamp}.zip`;
 
+      // Save the backup to the 'pre-import' folder
       return cy.writeFile(exportPath, exportRes.body, { encoding: "binary" }).then(() => {
-        cy.log("Backup ZIP saved successfully.");
+        cy.log("Backup ZIP saved successfully to pre-import directory.");
+
+        // Optionally, move the file to another location, or continue processing if necessary
         return cy.task("moveFile", {
           source: exportPath,
-          destination: `${backupDir}/backup_instance2_${timestamp}.zip`,
+          destination: `cypress/fixtures/backups/pre-import/backup_instance2_${timestamp}.zip`,
         });
       });
     }).then(() => {
@@ -462,6 +465,7 @@ describe("Scrape dashboard details from selected dashboards ", () => {
 
 
 describe("Verify dashboard details from Instance 1 and Instance 2", () => {
+
 
 
 

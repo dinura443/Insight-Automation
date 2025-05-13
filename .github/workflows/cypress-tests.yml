@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload backup to server
         run: |
-          echo "📤 Uploading ${{ env.BACKUP_NAME }}"
+          echo "Uploading ${{ env.BACKUP_NAME }}"
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             ${{ env.BACKUP_NAME }} \
             AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups
