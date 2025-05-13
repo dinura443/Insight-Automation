@@ -11,7 +11,7 @@ let dashboardNames = [];
 
 
 
-xdescribe("Export dashboards from the 1st instance", () => {
+describe("Export dashboards from the 1st instance", () => {
   before(() => {
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
@@ -106,7 +106,7 @@ xdescribe("Export dashboards from the 1st instance", () => {
   });
 });
 
-xdescribe("Backup existing dashboards in Instance 2 using REST API", () => {
+describe("Backup existing dashboards in Instance 2 using REST API", () => {
   before(() => {
     cy.log("Logging into Instance 2...");
     login.visitInstance2();
@@ -206,7 +206,7 @@ xdescribe("Backup existing dashboards in Instance 2 using REST API", () => {
   });
 });
 
-xdescribe("Import the dashboard from instance1 ", () =>{
+describe("Import the dashboard from instance1 ", () =>{
   it("Import the dashboard from Instance 1 (instance: 2)", () => {
     cy.log("Logging in to Instance 2...");
     login.visitInstance2();
@@ -236,7 +236,7 @@ xdescribe("Import the dashboard from instance1 ", () =>{
   });
 
 });
-xdescribe("Export dashboards from the 2nd instance for verification", () => {
+describe("Export dashboards from the 2nd instance for verification", () => {
   before(() => {
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
