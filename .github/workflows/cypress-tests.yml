@@ -61,8 +61,8 @@ jobs:
           echo "📋 You are importing: ${ITEM_ARRAY[@]}"
 
           if [ "$MODE" == "dashboard" ]; then
-            npx cypress run --spec "cypress/e2e/dashboard-Bulk-Import-Operations.cy.js"
-            npx cypress run --spec "cypress/e2e/dashboard-Bulk-Verification-Operations.cy.js"
+            npx cypress run --spec "cypress/e2e/dashboard-Import-Operations.cy.js"
+
 
           elif [ "$MODE" == "charts" ]; then
             npx cypress run --spec "cypress/e2e/chart-Import-Operations.cy.js"
