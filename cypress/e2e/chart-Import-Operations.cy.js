@@ -4,7 +4,6 @@ import { Chart } from "../../page-objects-and-services/page-objects/chart-Obects
 const loginPage = new LoginPage();
 const chartPage = new Chart();
 
-
 let chartName = [];
 
 before(() => {
@@ -17,8 +16,6 @@ before(() => {
 
 describe("Export charts from the 1st instance", () => {
   before(() => {
-    cy.log("Logging in and saving session...");
-
     loginPage.visitInstance1();
     loginPage.enterUsername(Cypress.env("username"));
     loginPage.enterPassword(Cypress.env("password"));
@@ -28,11 +25,9 @@ describe("Export charts from the 1st instance", () => {
     chartPage.visitChartPage();
     cy.wait(5000);
 
-    // Capture session cookie
     cy.getCookie("session").should("exist").then((cookie) => {
       let sessionCookie = cookie.value;
       cy.writeFile("cypress/fixtures/superset_session.json", { value: sessionCookie });
-      cy.log("Session cookie captured.");
     });
   });
 
@@ -50,8 +45,6 @@ describe("Export charts from the 1st instance", () => {
     const supersetUrl = Cypress.env("instance1Login");
 
     this.chartNames.forEach((chartName) => {
-      cy.log(`Searching for chart: "${chartName}"`);
-
       const encodedQuery = encodeURIComponent(
         JSON.stringify({
           filters: [
@@ -64,7 +57,6 @@ describe("Export charts from the 1st instance", () => {
         })
       );
 
-      // Step 1: Search chart by name to get its ID
       cy.request({
         method: "GET",
         url: `${supersetUrl}/api/v1/chart/?q=${encodedQuery}`,
@@ -74,18 +66,12 @@ describe("Export charts from the 1st instance", () => {
         failOnStatusCode: false,
       }).then((res) => {
         if (res.status !== 200 || !res.body.result?.length) {
-          cy.log(`Chart "${chartName}" not found.`);
           return;
         }
 
         const chartId = res.body.result[0].id;
-        cy.log(`Found chart "${chartName}" with ID: ${chartId}`);
-
-        // Step 2: Export chart using simple ID list in RISON format
         const idListRison = `!(${chartId})`;
         const exportUrl = `${supersetUrl}/api/v1/chart/export/?q=${encodeURIComponent(idListRison)}`;
-
-        cy.log(`Exporting chart via URL: ${exportUrl}`);
 
         cy.request({
           method: "GET",
@@ -102,7 +88,6 @@ describe("Export charts from the 1st instance", () => {
             exportRes.body,
             { encoding: "binary" }
           );
-          cy.log(`Chart "${chartName}" exported successfully.`);
         });
       });
     });
@@ -113,35 +98,26 @@ describe("Backup charts from Instance 2", () => {
   let sessionCookie;
 
   before(() => {
-    cy.log("🔐 Logging in and saving session...");
-
-    // Step 1: Visit and log in to Instance 2
     loginPage.visitInstance2();
     loginPage.enterUsername(Cypress.env("username"));
     loginPage.enterPassword(Cypress.env("password"));
     loginPage.clickLoginButton();
 
     cy.wait(5000);
-
-    // Step 2: Navigate to chart list page
     chartPage.visitChartPage();
     cy.wait(5000);
 
-    // Step 3: Capture session cookie
     cy.getCookie("session").should("exist").then((cookie) => {
       sessionCookie = cookie.value;
       cy.writeFile("cypress/fixtures/superset_session.json", { value: sessionCookie });
-      cy.log("✅ Session cookie captured.");
     });
   });
 
   beforeEach(function () {
-    // Load session cookie
     cy.fixture("superset_session.json").then((session) => {
       this.sessionCookie = session.value;
     });
 
-    // Load chart names
     this.chartNames = Cypress.env("CHART_NAMES")
       .split(",")
       .map((name) => name.trim());
@@ -149,8 +125,6 @@ describe("Backup charts from Instance 2", () => {
 
   it("Should back up existing charts in Instance 2 (if any)", function () {
     this.chartNames.forEach((chartName) => {
-      cy.log(`🔍 Checking if chart "${chartName}" exists in Instance 2`);
-
       const encodedQuery = encodeURIComponent(
         JSON.stringify({
           filters: [
@@ -173,18 +147,12 @@ describe("Backup charts from Instance 2", () => {
         failOnStatusCode: false,
       }).then((res) => {
         if (res.status !== 200 || !res.body.result?.length) {
-          cy.log(`🚫 Chart "${chartName}" not found in Instance 2. Skipping.`);
           return;
         }
 
         const chartId = res.body.result[0].id;
-        cy.log(`🗂️ Chart "${chartName}" found in Instance 2 with ID: ${chartId}`);
-
-        // Step 2: Export chart using correct RISON format
         const risonFilter = `!(${chartId})`;
         const exportUrl = `${Cypress.env("instance2Login")}/api/v1/chart/export/?q=${encodeURIComponent(risonFilter)}`;
-
-        cy.log(`📤 Exporting chart "${chartName}" from Instance 2`);
 
         cy.request({
           method: "GET",
@@ -196,7 +164,6 @@ describe("Backup charts from Instance 2", () => {
           encoding: "binary",
         }).then((exportRes) => {
           if (exportRes.status !== 200) {
-            cy.log(`🚫 Failed to export "${chartName}" from Instance 2`);
             return;
           }
 
@@ -206,10 +173,6 @@ describe("Backup charts from Instance 2", () => {
             { encoding: "binary" }
           );
 
-          cy.log(`💾 Chart "${chartName}" backed up from Instance 2.`);
-
-          // ✅ NEW STEP: DELETE chart from Instance 2 after backup
-          cy.log(`🗑️ Deleting chart "${chartName}" from Instance 2...`);
           cy.request({
             method: "DELETE",
             url: `${Cypress.env("instance2Login")}/api/v1/chart/${chartId}`,
@@ -218,12 +181,6 @@ describe("Backup charts from Instance 2", () => {
               Accept: "application/json",
             },
             failOnStatusCode: false,
-          }).then((deleteRes) => {
-            if (deleteRes.status === 200) {
-              cy.log(`✅ Chart "${chartName}" deleted from Instance 2`);
-            } else {
-              cy.log(`⚠️ Failed to delete chart "${chartName}". Status: ${deleteRes.status}`);
-            }
           });
         });
       });
@@ -232,7 +189,7 @@ describe("Backup charts from Instance 2", () => {
 });
 
 describe("Import charts to Instance 2 from the instance1", () => {
-  const archiveDir = Cypress.env("ARCHIVE_INSTANCE1"); // e.g., "cypress/fixtures/ARCHIVE_INSTANCE1"
+  const archiveDir = Cypress.env("ARCHIVE_INSTANCE1");
 
   it("Should import all ZIP files from ARCHIVE_INSTANCE1 into Instance 2", function () {
     let zipFiles;
@@ -240,17 +197,9 @@ describe("Import charts to Instance 2 from the instance1", () => {
     cy.task("getFilesInDirectory", archiveDir).then((files) => {
       zipFiles = files;
       if (!zipFiles || zipFiles.length === 0) {
-        cy.log(`📂 No ZIP files found in ${archiveDir}. Skipping.`);
         return;
       }
 
-      cy.log(`📦 Found ${zipFiles.length} ZIP files:`);
-      zipFiles.forEach((filePath) => {
-        const fileName = filePath.split("/").pop();
-        cy.log(` - ${fileName}`);
-      });
-
-      // Log in to Instance 2
       loginPage.visitInstance2();
       loginPage.enterUsername(Cypress.env("username"));
       loginPage.enterPassword(Cypress.env("password"));
@@ -260,22 +209,13 @@ describe("Import charts to Instance 2 from the instance1", () => {
       chartPage.visitChartPage();
       cy.wait(5000);
 
-      // Import each ZIP file using relative path only
       if (zipFiles && zipFiles.length > 0) {
         zipFiles.forEach((fullFilePath) => {
-          const relativePath = fullFilePath.replace(/^.*fixtures[\\\/]/, ""); // Make it relative
-          const fileName = relativePath.split("/").pop();
-
-          cy.log(`📤 Uploading: ${fileName}`);
-
-          // ✅ Now we use only relative path like "ARCHIVE_INSTANCE1/chart_export_20250511T122315.zip"
-          chartPage.uploadSpecificFile(relativePath); // Pass relative path to page object
-
+          const relativePath = fullFilePath.replace(/^.*fixtures[\\\/]/, "");
+          chartPage.uploadSpecificFile(relativePath);
           cy.wait(3000);
-          cy.reload(); // Optional: reload page between imports
+          cy.reload();
         });
-
-        cy.log("🎉 Chart imports completed successfully.");
       }
     });
   });
@@ -283,8 +223,6 @@ describe("Import charts to Instance 2 from the instance1", () => {
 
 describe("Export The charts from instance2 for verification", () => {
   before(() => {
-    cy.log("Logging in and saving session...");
-
     loginPage.visitInstance2();
     loginPage.enterUsername(Cypress.env("username"));
     loginPage.enterPassword(Cypress.env("password"));
@@ -294,11 +232,9 @@ describe("Export The charts from instance2 for verification", () => {
     chartPage.visitChartPage();
     cy.wait(5000);
 
-    // Capture session cookie
     cy.getCookie("session").should("exist").then((cookie) => {
       let sessionCookie = cookie.value;
       cy.writeFile("cypress/fixtures/superset_session.json", { value: sessionCookie });
-      cy.log("Session cookie captured.");
     });
   });
 
@@ -316,8 +252,6 @@ describe("Export The charts from instance2 for verification", () => {
     const supersetUrl = Cypress.env("instance2Login");
 
     this.chartNames.forEach((chartName) => {
-      cy.log(`Searching for chart: "${chartName}"`);
-
       const encodedQuery = encodeURIComponent(
         JSON.stringify({
           filters: [
@@ -330,7 +264,6 @@ describe("Export The charts from instance2 for verification", () => {
         })
       );
 
-      // Step 1: Search chart by name to get its ID
       cy.request({
         method: "GET",
         url: `${supersetUrl}/api/v1/chart/?q=${encodedQuery}`,
@@ -340,18 +273,12 @@ describe("Export The charts from instance2 for verification", () => {
         failOnStatusCode: false,
       }).then((res) => {
         if (res.status !== 200 || !res.body.result?.length) {
-          cy.log(`Chart "${chartName}" not found.`);
           return;
         }
 
         const chartId = res.body.result[0].id;
-        cy.log(`Found chart "${chartName}" with ID: ${chartId}`);
-
-        // Step 2: Export chart using simple ID list in RISON format
         const idListRison = `!(${chartId})`;
         const exportUrl = `${supersetUrl}/api/v1/chart/export/?q=${encodeURIComponent(idListRison)}`;
-
-        cy.log(`Exporting chart via URL: ${exportUrl}`);
 
         cy.request({
           method: "GET",
@@ -368,7 +295,6 @@ describe("Export The charts from instance2 for verification", () => {
             exportRes.body,
             { encoding: "binary" }
           );
-          cy.log(`Chart "${chartName}" exported successfully.`);
         });
       });
     });

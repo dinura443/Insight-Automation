@@ -1,14 +1,14 @@
-name: Insight - Cypress Tests
-
 on:
   workflow_dispatch:
     inputs:
       mode:
         type: choice
         options:
-          - single
-          - bulk
-        description: Choose 'single' or 'bulk' export/import mode
+          - dashboard-single
+          - dashboard-bulk
+          - charts
+          - datasets
+        description: "Choose what to import: single dashboard, bulk dashboards, charts, or datasets"
         required: true
 
       dashboard_name:
@@ -16,9 +16,9 @@ on:
         description: "Dashboard name (for single mode)"
         required: false
 
-      dashboard_list:
+      item_list:
         type: string
-        description: "Comma-separated list of dashboard names (for bulk mode)"
+        description: "Comma-separated list of items (dashboards, charts, or datasets)"
         required: false
 
 jobs:
@@ -44,18 +44,22 @@ jobs:
         run: |
           echo "MODE=${{ github.event.inputs.mode }}" >> $GITHUB_ENV
 
-          if [[ "${{ github.event.inputs.mode }}" == "single" ]]; then
+          if [[ "${{ github.event.inputs.mode }}" == "dashboard-single" ]]; then
             if [[ -z "${{ github.event.inputs.dashboard_name }}" ]]; then
               echo "Error: Dashboard name is required in single mode."
               exit 1
             fi
             echo "DASHBOARD_NAMES=${{ github.event.inputs.dashboard_name }}" >> $GITHUB_ENV
-          elif [[ "${{ github.event.inputs.mode }}" == "bulk" ]]; then
-            if [[ -z "${{ github.event.inputs.dashboard_list }}" ]]; then
-              echo "Error: Dashboard list is required in bulk mode."
+
+          elif [[ "${{ github.event.inputs.mode }}" == "dashboard-bulk" || \
+                  "${{ github.event.inputs.mode }}" == "charts" || \
+                  "${{ github.event.inputs.mode }}" == "datasets" ]]; then
+            if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
+              echo "Error: Item list is required for bulk modes (dashboards, charts, datasets)."
               exit 1
             fi
-            echo "DASHBOARD_NAMES=${{ github.event.inputs.dashboard_list }}" >> $GITHUB_ENV
+            echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+
           else
             echo "Invalid mode selected."
             exit 1
@@ -70,19 +74,30 @@ jobs:
 
       - name: Run Relevant Cypress Tests
         run: |
-          echo "MODE: ${{ env.MODE }}"
-          echo "DASHBOARD_NAMES: ${{ env.DASHBOARD_NAMES }}"
+          MODE="${{ env.MODE }}"
 
-          if [ "${{ env.MODE }}" = "single" ]; then
-            echo "Running tests for single dashboard..."
+          if [ "$MODE" = "dashboard-single" ]; then
+            echo " Running tests for single dashboard..."
             npx cypress run --spec "cypress/e2e/dashboard-Single-Import-Operations.cy.js"
             npx cypress run --spec "cypress/e2e/dashboard-Single-Verification-Operations.cy.js"
-          elif [ "${{ env.MODE }}" = "bulk" ]; then
+
+          elif [ "$MODE" = "dashboard-bulk" ]; then
             echo "Running tests for bulk dashboards..."
             npx cypress run --spec "cypress/e2e/dashboard-Bulk-Import-Operations.cy.js" || true
             npx cypress run --spec "cypress/e2e/dashboard-Bulk-Verification-Operations.cy.js" || true
+
+          elif [ "$MODE" = "charts" ]; then
+            echo " Running tests for charts..."
+            npx cypress run --spec "cypress/e2e/chart-Import-Operations.cy.js"
+            npx cypress run --spec "cypress/e2e/chart-Verification-Operation.cy.js"
+
+          elif [ "$MODE" = "datasets" ]; then
+            echo " Running tests for datasets..."
+            npx cypress run --spec "cypress/e2e/dataset-Import-Operations.cy.js"
+            npx cypress run --spec "cypress/e2e/dataset-Verification-Operation.cy.js"
+
           else
-            echo "Unknown mode: ${{ env.MODE }}"
+            echo " Unknown mode: $MODE"
             exit 1
           fi
 
@@ -99,7 +114,7 @@ jobs:
 
       - name: Upload dashboard backup to server
         run: |
-          echo "Uploading ${{ env.BACKUP_NAME }} to server..."
+          echo " Uploading ${{ env.BACKUP_NAME }} to server..."
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
             AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups

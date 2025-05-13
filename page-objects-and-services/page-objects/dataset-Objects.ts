@@ -1,5 +1,5 @@
-export class Chart {
-    chartPageBtn = "(//a[normalize-space()='Charts'])[1]";
+export class DataSet {
+    datasetPageBtn = "//a[normalize-space()='Datasets']";
     bulkSelectBtn = "//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-secondary css-1ur28sd']";
     exportButton = "//button[@class='antd5-btn css-7kui6y antd5-btn-primary antd5-btn-color-primary antd5-btn-variant-solid superset-button superset-button-primary cta css-1pe2gaq']";
     importButtonSelector = "(//button[@class='antd5-btn css-7kui6y antd5-btn-link antd5-btn-color-primary antd5-btn-variant-link superset-button superset-button-link css-1ckc79t'])[1]";
@@ -11,9 +11,11 @@ export class Chart {
     copyquerySelector = "(//button[@class='antd5-btn css-7kui6y antd5-btn-default antd5-btn-color-default antd5-btn-variant-outlined superset-button superset-button-undefined css-1s3j1k9'])[1]";
    TypeinsertSelector = "(//span[@class='ant-input-affix-wrapper css-1ij993o'])[1]";
    sqlEditorSelector = "//div[@class='ace_content']";
-    visitChartPage(): void {
-        cy.log("Navigating to the chart page...");
-        cy.xpath(this.chartPageBtn).click();
+
+
+    visitDatasetPage(): void {
+        cy.log("Navigating to the dataset page...");
+        cy.xpath(this.datasetPageBtn).click();
         cy.wait(10000);
     }
 
@@ -32,6 +34,4 @@ export class Chart {
 
 
 }
-
-
 

@@ -5,7 +5,8 @@ import * as path from "path";
 import { VerifyExporter } from "./page-objects-and-services/page-objects/dashboard-File-Verification";
 import { UiVerifier } from "./page-objects-and-services/page-objects/dashboard-Ui-Verification";
 import { SingleUiVerifier } from "./page-objects-and-services/page-objects/dashboard-Single-Ui-Verification";
-
+import { FolderStructureVerifier } from "./page-objects-and-services/page-objects/chart-File-Verification";
+import { DatasetStructureVerifier } from "./page-objects-and-services/page-objects/dataset-File-Verification";
 
 dotenv.config();
 
@@ -34,16 +35,15 @@ export default defineConfig({
     FILECOMPONENTS_INSTANCE2: process.env.FILECOMPONENTS_INSTANCE2,
     FILECOMPONENTS_INSTANCE1CHARTS : process.env.FILECOMPONENTS_INSTANCE1CHARTS,
     FILECOMPONENTS_INSTANCE2CHARTS : process.env.FILECOMPONENTS_INSTANCE2CHARTS,
-
     instance1Login: process.env.INSTANCE1_LOGIN,
     instance2Login: process.env.INSTANCE2_LOGIN,
     dashboardUi: process.env.DASHBOARD_UI,
     backupDir: process.env.BACKUP,
     rootDir: process.env.ROOT_DIR,
     backupStatusDir: process.env.BACKUPSTATUSDIR,
-    DASHBOARD_NAMES: process.env.DASHBOARD_NAMES,
-
-    CHART_NAMES: process.env.DASHBOARD_NAMES,
+    DASHBOARD_NAMES: process.env.ITEM_NAME,
+    DATASET_NAMES: process.env.ITEM_NAME,
+    CHART_NAMES: process.env.ITEM_NAME,
   },
   e2e: {
     video: true,
@@ -67,8 +67,33 @@ export default defineConfig({
 
 
 
+
+      on("task", {
+        verifyDatasetExportStructure({ dir1, dir2 }) {
+          const verifier = new DatasetStructureVerifier(dir1, dir2);
+          const result = verifier.verify();
+      
+          if (!result.success) {
+            const errorMessage = [
+              "❌ Dataset structure verification failed.",
+              ...(result.summary?.mismatches || []).map((mismatch: any) => {
+                return `\nBetween "${mismatch.folder1}" and "${mismatch.folder2}":\n` +
+                  Object.entries(mismatch.diff)
+                    .map(([category, counts]: [string, any]) =>
+                      ` - ${category}: ${counts.instance1} (Instance 1) vs ${counts.instance2} (Instance 2)`
+                    )
+                    .join("\n");
+              })
+            ].join("\n");
+      
+            console.error(errorMessage); // For terminal
+            return { success: false, message: errorMessage };
+          }
+      
+          return { success: true, message: "✅ All dataset export structures matched!" };
+        },
+      });
       on('task', {
-        // Task to get all .zip files in a given directory
         getFilesInDirectory(directoryPath) {
           if (!fs.existsSync(directoryPath)) {
             throw new Error(`Directory does not exist: ${directoryPath}`);
@@ -156,7 +181,7 @@ export default defineConfig({
             return {
               success: true,
               summary: {
-                message: "✅ All files matched between instances"
+                message: " All files matched between instances"
               }
             };
       
@@ -314,13 +339,36 @@ export default defineConfig({
         },
       });
 
-
+      on("task", {
+        verifyChartExportStructure({ dir1, dir2 }) {
+          const verifier = new FolderStructureVerifier(dir1, dir2);
+          const result = verifier.verify();
+      
+          if (!result.success) {
+            const errorMessage = [
+              "❌ Folder structure verification failed.",
+              ...(result.summary?.mismatches || []).map((mismatch: any) => {
+                return `\nBetween "${mismatch.folder1}" and "${mismatch.folder2}":\n` +
+                  Object.entries(mismatch.diff)
+                    .map(([category, counts]: [string, any]) =>
+                      ` - ${category}: ${counts.instance1} (Instance 1) vs ${counts.instance2} (Instance 2)`
+                    )
+                    .join("\n");
+              })
+            ].join("\n");
+      
+            console.error(errorMessage); // For terminal
+            return { success: false, message: errorMessage };
+          }
+      
+          return { success: true, message: "✅ All chart export structures matched!" };
+        },
+      });
       on("task", {
         verifySupersetFiles({ extractedFilesDir, importVerifyDir }) {
           const verifier = new VerifyExporter(extractedFilesDir, importVerifyDir);
           const result = verifier.compare();
       
-          // Filter out chart-related file name mismatches
             const missingNonCharts: string[] = result.summary.missingInDir2?.filter((f: string) => !f.startsWith("charts/")) || [];
             const extraNonCharts: string[] = result.summary.extraInDir2?.filter((f: string) => !f.startsWith("charts/")) || [];
       
@@ -339,11 +387,11 @@ export default defineConfig({
       
           if (hasRelevantMismatch) {
             const detailed: string = detailedNonChartDiffs.map((entry) => {
-              return `❌ Mismatch in "${entry.file}":\n${entry.differences.map((d) => `  - ${d}`).join("\n")}`;
+              return `Mismatch in "${entry.file}":\n${entry.differences.map((d) => `  - ${d}`).join("\n")}`;
             }).join("\n\n") || "";
       
             const message = [
-              "❌ YAML verification failed.",
+              "YAML verification failed.",
               `Missing files: ${missingNonCharts.join(", ") || "None"}`,
               `Extra files: ${extraNonCharts.join(", ") || "None"}`,
               detailed
@@ -353,11 +401,11 @@ export default defineConfig({
             return { success: false, message };
           }
       
-          console.log("✅ YAML verification passed!");
-          return { success: true, message: "✅ YAML verification passed!" };
+          console.log(" YAML verification passed!");
+          return { success: true, message: "YAML verification passed!" };
         }
       });
-      
+
       
       on("task", {
         log(message: string) {
