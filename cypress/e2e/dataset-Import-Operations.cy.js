@@ -168,7 +168,7 @@ describe("Backup datasets from Instance 2", () => {
           }
 
           cy.writeFile(
-            `cypress/fixtures/backups/pre-import/datasets/${datasetName.replace(/\s+/g, "_")}_dataset_backup.zip`,
+            `cypress/fixtures/backups/pre-import/${datasetName.replace(/\s+/g, "_")}_dataset_backup.zip`,
             exportRes.body,
             { encoding: "binary" }
           );
