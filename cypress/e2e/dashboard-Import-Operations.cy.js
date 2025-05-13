@@ -10,7 +10,7 @@ let dashboardNames = [];
 
 
   
-xdescribe("Export dashboards from the 1st instance", () => {
+describe("Export dashboards from the 1st instance", () => {
   before(() => {
     login.visitInstance1();
     login.enterUsername(Cypress.env("username"));
