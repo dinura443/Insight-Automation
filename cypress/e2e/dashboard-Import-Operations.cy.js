@@ -6,8 +6,14 @@ const dashboard = new DashBoard();
 const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
 const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
-let dashboardname = [];
-
+let dashboardNames = [];
+before(() => {
+  const envList = Cypress.env("ITEM_NAMES");
+if (!envList || typeof envList !== "string") {
+  throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
+}
+dashboardNames = envList.split(",").map((name) => name.trim());
+});
 
   
 describe("Export dashboards from the 1st instance", () => {
@@ -107,12 +113,6 @@ describe("Export dashboards from the 1st instance", () => {
 
 describe("Backup existing dashboards in Instance 2 using REST API", () => {
   before(() => {
-
-       const envList = Cypress.env("ITEM_NAMES");
-  if (!envList || typeof envList !== "string") {
-    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
-  }
-  dashboardname = envList.split(",").map((name) => name.trim());
     cy.log("Logging into Instance 2...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -191,7 +191,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
         // Optionally, move the file to another location, or continue processing if necessary
         return cy.task("moveFile", {
           source: exportPath,
-          destination: `cypress/fixtures/backups/pre-import/${dashboardname.replace(/\s+/g, "_")}_backup.zip`,
+          destination: `cypress/fixtures/backups/pre-import/${dashboardNames.replace(/\s+/g, "_")}_backup.zip`,
         });
       });
     }).then(() => {
@@ -345,14 +345,6 @@ describe("Export dashboards from the 2nd instance for verification", () => {
 
 describe("Scrape dashboard details from selected dashboards ", () => {
 
-
-  before(() => {
-    const envList = Cypress.env("ITEM_NAMES");
-  if (!envList || typeof envList !== "string") {
-    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
-  }
-  dashboardNames = envList.split(",").map((name) => name.trim());
-  });
 
 
 
