@@ -6,7 +6,6 @@ const dashboard = new DashBoard();
 const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
 const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
-let dashboardNames = [];
 
 
 
@@ -338,6 +337,8 @@ before(() => {
   }
   dashboardNames = envList.split(",").map((name) => name.trim());
 });
+let dashboardNames = [];
+
 describe("Scrape dashboard details from selected dashboards ", () => {
 
 
