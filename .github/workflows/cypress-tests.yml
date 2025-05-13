@@ -50,21 +50,40 @@ jobs:
               exit 1
             fi
             echo "DASHBOARD_NAMES=${{ github.event.inputs.dashboard_name }}" >> $GITHUB_ENV
+            echo "✅ Running in 'dashboard-single' mode"
+            echo "🎯 Dashboard Name: ${{ github.event.inputs.dashboard_name }}"
 
-          elif [[ "${{ github.event.inputs.mode }}" == "dashboard-bulk" || \
-                  "${{ github.event.inputs.mode }}" == "charts" || \
-                  "${{ github.event.inputs.mode }}" == "datasets" ]]; then
+          elif [[ "${{ github.event.inputs.mode }}" == "dashboard-bulk" ]]; then
             if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
-              echo "Error: Item list is required for bulk modes (dashboards, charts, datasets)."
+              echo "Error: Item list is required in bulk dashboard mode."
               exit 1
             fi
             echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+            echo "✅ Running in 'dashboard-bulk' mode"
+            echo "🎯 Dashboard List: ${{ github.event.inputs.item_list }}"
+
+          elif [[ "${{ github.event.inputs.mode }}" == "charts" ]]; then
+            if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
+              echo "Error: Item list is required for charts mode."
+              exit 1
+            fi
+            echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+            echo "✅ Running in 'charts' mode"
+            echo "🎯 Chart List: ${{ github.event.inputs.item_list }}"
+
+          elif [[ "${{ github.event.inputs.mode }}" == "datasets" ]]; then
+            if [[ -z "${{ github.event.inputs.item_list }}" ]]; then
+              echo "Error: Item list is required for datasets mode."
+              exit 1
+            fi
+            echo "ITEM_LIST=${{ github.event.inputs.item_list }}" >> $GITHUB_ENV
+            echo "✅ Running in 'datasets' mode"
+            echo "🎯 Dataset List: ${{ github.event.inputs.item_list }}"
 
           else
-            echo "Invalid mode selected."
+            echo "❌ Invalid mode selected."
             exit 1
           fi
-
       - name: Create SSH key
         run: |
           echo "$SSH_PRIVATE_KEY" > AccumeticKey.pem
