@@ -190,7 +190,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
     
       return cy.writeFile(exportPath, exportRes.body, { encoding: "binary" }).then(() => {
         cy.log(`Backup ZIP saved successfully to: ${exportPath}`);
-      });
+      
     });
     
     }).then(() => {
@@ -213,7 +213,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
       }
     });
   });
-
+});
 
 describe("Import the dashboard from instance1 ", () =>{
   it("Import the dashboard from Instance 1 (instance: 2)", () => {
