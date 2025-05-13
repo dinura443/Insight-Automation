@@ -37,7 +37,7 @@ describe("Export dashboards from the 1st instance", () => {
       this.sessionCookie = session.value;
     });
 
-    this.DASHBOARD_NAMES = Cypress.env("DASHBOARD_NAMES")
+    this.DASHBOARD_NAMES = Cypress.env("ITEM_NAME")
       .split(",")
       .map((name) => name.trim());
   });
@@ -124,7 +124,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
 
   it("Should back up and delete matching dashboards before import", function () {
     const supersetUrl = Cypress.env("instance2Login");
-    const dashboardNamesToImport = Cypress.env("DASHBOARD_NAMES")
+    const dashboardNamesToImport = Cypress.env("ITEM_NAME")
       .split(",")
       .map((name) => name.trim());
 
@@ -262,7 +262,7 @@ describe("Export dashboards from the 2nd instance for verification", () => {
       this.sessionCookie = session.value;
     });
 
-    this.DASHBOARD_NAMES = Cypress.env("DASHBOARD_NAMES")
+    this.DASHBOARD_NAMES = Cypress.env("ITEM_NAME")
       .split(",")
       .map((name) => name.trim());
   });
