@@ -8,6 +8,13 @@ const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
 
 
+  const envList = Cypress.env("ITEM_NAME");
+  if (!envList || typeof envList !== "string") {
+    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
+  }
+  dashboardNames = envList.split(",").map((name) => name.trim());
+
+let dashboardNames = [];
 
 
 describe("Export dashboards from the 1st instance", () => {
@@ -330,14 +337,7 @@ describe("Export dashboards from the 2nd instance for verification", () => {
   });
 });
 
-before(() => {
-  const envList = Cypress.env("DASHBOARD_NAMES");
-  if (!envList || typeof envList !== "string") {
-    throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
-  }
-  dashboardNames = envList.split(",").map((name) => name.trim());
-});
-let dashboardNames = [];
+
 
 describe("Scrape dashboard details from selected dashboards ", () => {
 

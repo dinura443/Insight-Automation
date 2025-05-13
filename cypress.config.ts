@@ -47,6 +47,7 @@ export default defineConfig({
     DASHBOARD_NAMES: process.env.ITEM_NAME,
     DATASET_NAMES: process.env.ITEM_NAME,
     CHART_NAMES: process.env.ITEM_NAME,
+    ITEM_NAME : process.env.ITEM_NAME
   },
   e2e: {
     video: true,
