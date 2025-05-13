@@ -180,20 +180,19 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
         cy.log("Export failed or skipped.");
         return;
       }
-
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const exportPath = `cypress/fixtures/backups/pre-import`;
-
-      // Save the backup to the 'pre-import' folder
+    
+      // Extract filename from Content-Disposition header
+      const contentDisp = exportRes.headers["content-disposition"];
+      const match = contentDisp && contentDisp.match(/filename="?(.+?)"?$/);
+      const fileName = match ? match[1] : "dashboards_export.zip"; // fallback
+    
+      const exportPath = `cypress/fixtures/backups/pre-import/${fileName}`;
+    
       return cy.writeFile(exportPath, exportRes.body, { encoding: "binary" }).then(() => {
-        cy.log("Backup ZIP saved successfully to pre-import directory.");
-
-        // Optionally, move the file to another location, or continue processing if necessary
-        return cy.task("moveFile", {
-          source: exportPath,
-          destination: `cypress/fixtures/backups/pre-import/${dashboardNames.replace(/\s+/g, "_")}_backup.zip`,
-        });
+        cy.log(`Backup ZIP saved successfully to: ${exportPath}`);
       });
+    });
+    
     }).then(() => {
       if (foundDashboardIds.length) {
         cy.log("Deleting matched dashboards...");
@@ -214,7 +213,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
       }
     });
   });
-});
+
 
 describe("Import the dashboard from instance1 ", () =>{
   it("Import the dashboard from Instance 1 (instance: 2)", () => {
