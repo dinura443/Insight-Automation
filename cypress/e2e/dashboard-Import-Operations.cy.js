@@ -8,7 +8,13 @@ const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
 let dashboardNames = [];
 
-
+before(() => {
+  const envList = Cypress.env("DASHBOARD_NAMES");
+  if (!envList || typeof envList !== "string") {
+    throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
+  }
+  dashboardname = envList.split(",").map((name) => name.trim());
+});
   
 describe("Export dashboards from the 1st instance", () => {
   before(() => {
@@ -191,7 +197,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
         // Optionally, move the file to another location, or continue processing if necessary
         return cy.task("moveFile", {
           source: exportPath,
-          destination: `cypress/fixtures/backups/pre-import/backup_instance2_${timestamp}.zip`,
+          destination: `cypress/fixtures/backups/pre-import/${dashboardname.replace(/\s+/g, "_")}_backup.zip`,
         });
       });
     }).then(() => {
