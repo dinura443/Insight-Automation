@@ -297,6 +297,7 @@ describe("Export The charts from instance2 for verification", () => {
           );
         });
       });
+      cy.wait(10000)
     });
   });
 });
