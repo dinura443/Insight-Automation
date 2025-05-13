@@ -107,6 +107,12 @@ describe("Export dashboards from the 1st instance", () => {
 
 describe("Backup existing dashboards in Instance 2 using REST API", () => {
   before(() => {
+
+       const envList = Cypress.env("ITEM_NAMES");
+  if (!envList || typeof envList !== "string") {
+    throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
+  }
+  dashboardNames = envList.split(",").map((name) => name.trim());
     cy.log("Logging into Instance 2...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
@@ -114,6 +120,8 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
     login.clickLoginButton();
     cy.wait(3000);
   });
+
+
 
   it("Should back up and delete matching dashboards before import", function () {
     const supersetUrl = Cypress.env("instance2Login");
@@ -174,7 +182,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
       }
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const exportPath = `cypress/fixtures/backups/pre-import/backup_instance2_${timestamp}.zip`;
+      const exportPath = `cypress/fixtures/backups/pre-import`;
 
       // Save the backup to the 'pre-import' folder
       return cy.writeFile(exportPath, exportRes.body, { encoding: "binary" }).then(() => {
