@@ -6,15 +6,9 @@ const dashboard = new DashBoard();
 const instance1Archive = Cypress.env("ARCHIVE_INSTANCE1");
 const desiredDownloadPathInstance1 = "ARCHIVE_INSTANCE1";
 const backupDir = "cypress/fixtures/backups/pre-import";
-let dashboardNames = [];
+let dashboardname = [];
 
-before(() => {
-  const envList = Cypress.env("DASHBOARD_NAMES");
-  if (!envList || typeof envList !== "string") {
-    throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
-  }
-  dashboardname = envList.split(",").map((name) => name.trim());
-});
+
   
 describe("Export dashboards from the 1st instance", () => {
   before(() => {
@@ -118,7 +112,7 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
   if (!envList || typeof envList !== "string") {
     throw new Error("No dashboard names provided. Set ITEM_NAME env var.");
   }
-  dashboardNames = envList.split(",").map((name) => name.trim());
+  dashboardname = envList.split(",").map((name) => name.trim());
     cy.log("Logging into Instance 2...");
     login.visitInstance2();
     login.enterUsername(Cypress.env("username"));
