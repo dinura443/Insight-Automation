@@ -13,7 +13,7 @@ before(() => {
   }
   chartName = envList.split(",").map((name) => name.trim());
 });
-//
+
 describe("Export charts from the 1st instance", () => {
   before(() => {
     loginPage.visitInstance1();
