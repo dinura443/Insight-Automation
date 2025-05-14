@@ -275,7 +275,7 @@ describe("Export The charts from instance2 for verification", () => {
         if (res.status !== 200 || !res.body.result?.length) {
           return;
         }
-
+//
         const chartId = res.body.result[0].id;
         const idListRison = `!(${chartId})`;
         const exportUrl = `${supersetUrl}/api/v1/chart/export/?q=${encodeURIComponent(idListRison)}`;
