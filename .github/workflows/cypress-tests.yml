@@ -7,7 +7,7 @@ on:
           - dashboard
           - charts
           - datasets
-        description: "Choose what to import: dashboard, charts or datasets"
+        description: "Chooose what to import: dashboard, charts or datasets"
         required: true
 
       item_names:
