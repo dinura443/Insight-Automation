@@ -111,54 +111,7 @@ export default defineConfig({
 
       
 
-        // Register custom tasks
-        on("task", {
-          // Returns all .zip file paths in a given directory
-          getFilesInDirectory(dirPath) {
-            try {
-              return fs
-                .readdirSync(dirPath)
-                .filter((file) => file.endsWith(".zip"))
-                .map((file) => path.join(dirPath, file));
-            } catch (err) {
-              throw new Error(`Error reading directory: ${dirPath} - ${(err as Error).message}`);
-            }
-          },
-  
-          // Unzips a given ZIP file into the specified directory
-          unzipFile({ zipPath, extractDir }) {
-            return new Promise((resolve, reject) => {
-              interface UnzipFileResult {
-                success: boolean;
-                message: string;
-                error?: string;
-              }
-
-              interface UnzipFileParams {
-                zipPath: string;
-                extractDir: string;
-              }
-
-              fs.createReadStream((zipPath as UnzipFileParams["zipPath"]))
-                .pipe(unzipper.Extract({ path: (extractDir as UnzipFileParams["extractDir"]) }))
-                .on("close", () => {
-                  resolve({ success: true, message: `Extracted ${zipPath} to ${extractDir}` } as UnzipFileResult);
-                })
-                .on("error", (err: Error) => {
-                  reject({ success: false, message: `Failed to unzip ${zipPath}`, error: err.message } as UnzipFileResult);
-                });
-            });
-          },
-  
-          // Lists all files/folders in a directory
-          listDirectoryContents(dirPath) {
-            try {
-              return fs.readdirSync(dirPath);
-            } catch (err) {
-              throw new Error(`Error listing contents of ${dirPath} - ${(err as Error).message}`);
-            }
-          }
-        });
+      
 
       on("task", {
         verifyDatasetExportStructure({ dir1, dir2 }) {
