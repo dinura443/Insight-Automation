@@ -43,8 +43,8 @@ describe("Verify datasets", () => {
 
   describe("Bulk Dataset Verification Process", () => {
     it("Verifies dataset export structure between Instance 1 and Instance 2", () => {
-      const instance1Dir = Cypress.env("FILECOMPONENTS_INSTANCE1"); // e.g., cypress/fixtures/instance1FileComponents
-      const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2"); // e.g., cypress/fixtures/instance2FileComponents
+      const instance1Dir = Cypress.env("FILECOMPONENTS_INSTANCE1"); 
+      const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2"); 
   
       cy.task("verifyDatasetExportStructure", {
         dir1: instance1Dir,

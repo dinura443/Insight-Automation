@@ -10,7 +10,6 @@ export class VerifyExporter {
     this.dir2 = dir2;
   }
 
-  // Get all top-level export folders (like dashboard_export_*, chart_export_*)
   private getExportFolders(baseDir: string): string[] {
     return fs.readdirSync(baseDir).filter(name => {
       const fullPath = path.join(baseDir, name);
@@ -18,13 +17,11 @@ export class VerifyExporter {
     });
   }
 
-  // Count .yaml files in a subdirectory
   private countYamlsInSubdir(targetDir: string): number {
     if (!fs.existsSync(targetDir)) return 0;
     return fs.readdirSync(targetDir).filter(file => file.endsWith(".yaml")).length;
   }
 
-  // Compare structure of one export folder pair
   private verifyExportPair(folder1Path: string, folder2Path: string): { success: boolean; diff?: any } {
     const result = {
       dashboards: {
@@ -70,7 +67,7 @@ export class VerifyExporter {
 
     if (dir1Exports.length !== dir2Exports.length) {
       console.error(
-        `❌ Mismatch: Number of export folders differ:\nInstance1: ${dir1Exports.length}\nInstance2: ${dir2Exports.length}`
+        `Mismatch: Number of export folders differ:\nInstance1: ${dir1Exports.length}\nInstance2: ${dir2Exports.length}`
       );
       return { success: false };
     }
@@ -103,7 +100,7 @@ export class VerifyExporter {
     }
 
     if (!allMatch) {
-      console.error("❌ Mismatches found:");
+      console.error("Mismatches found:");
       summary.mismatches.forEach(({ folder1, folder2, diff }) => {
         console.error(`\nBetween "${folder1}" and "${folder2}":`);
         Object.entries(diff!).forEach(([category, counts]: [string, any]) => {
@@ -114,7 +111,7 @@ export class VerifyExporter {
       return { success: false, summary };
     }
 
-    console.log("✅ All export structures match!");
+    console.log(" All export structures match!");
     return { success: true, summary };
   }
 }

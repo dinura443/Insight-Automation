@@ -42,8 +42,8 @@ jobs:
           echo "ITEM_NAMES=${{ github.event.inputs.item_names }}" >> $GITHUB_ENV
 
           # Log what we’re doing
-          echo "✅ Running in '$MODE' mode"
-          echo "🎯 Items to import: ${ITEM_NAMES}"
+          echo " Running in '$MODE' mode"
+          echo " Items to import: ${ITEM_NAMES}"
 
       - name: Create SSH key
         run: |
@@ -73,7 +73,7 @@ jobs:
             npx cypress run --spec "cypress/e2e/dataset-Verification-Operation.cy.js"
 
           else
-            echo "❌ Unknown mode: $MODE"
+            echo " Unknown mode: $MODE"
             exit 1
           fi
 

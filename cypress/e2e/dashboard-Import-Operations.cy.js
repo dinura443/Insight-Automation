@@ -133,7 +133,6 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
     const matchedDashboardNames = [];
 
     cy.wrap(null).then(() => {
-      // Use REST API to fetch all dashboards
       return cy.request({
         method: "GET",
         url: `${supersetUrl}/api/v1/dashboard/?q=${encodeURIComponent(JSON.stringify({ page_size: 1000 }))}`,
@@ -148,7 +147,6 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
         return;
       }
 
-      // Match by title and collect IDs
       res.body.result.forEach((dashboard) => {
         if (dashboardNamesToImport.includes(dashboard.dashboard_title)) {
           matchedDashboardNames.push(dashboard.dashboard_title);
@@ -166,7 +164,6 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
       const idListRison = `!(${foundDashboardIds.join(",")})`;
       const exportUrl = `${supersetUrl}/api/v1/dashboard/export/?q=${encodeURIComponent(idListRison)}`;
 
-      // Request export
       return cy.request({
         method: "GET",
         url: exportUrl,
@@ -181,10 +178,9 @@ describe("Backup existing dashboards in Instance 2 using REST API", () => {
         return;
       }
     
-      // Extract filename from Content-Disposition header
       const contentDisp = exportRes.headers["content-disposition"];
       const match = contentDisp && contentDisp.match(/filename="?(.+?)"?$/);
-      const fileName = match ? match[1] : "dashboards_export.zip"; // fallback
+      const fileName = match ? match[1] : "dashboards_export.zip"; 
     
       const exportPath = `cypress/fixtures/backups/pre-import/${fileName}`;
     
@@ -275,7 +271,6 @@ describe("Export dashboards from the 2nd instance for verification", () => {
     const dashboardNames = this.DASHBOARD_NAMES;
     const dashboardIds = [];
 
-    // Fetch dashboard IDs one by one
     cy.wrap(null).then(() => {
       return Cypress.Promise.each(dashboardNames, (dashboardName) => {
         const encodedQuery = encodeURIComponent(
@@ -319,7 +314,6 @@ describe("Export dashboards from the 2nd instance for verification", () => {
       const idListRison = `!(${dashboardIds.join(",")})`;
       const exportUrl = `${supersetUrl}/api/v1/dashboard/export/?q=${encodeURIComponent(idListRison)}`;
 
-      // Export dashboards as ZIP
       cy.request({
         method: "GET",
         url: exportUrl,
@@ -471,44 +465,34 @@ describe("Verify dashboard details from Instance 1 and Instance 2", () => {
   it("Verify that dashboard data from instance1 matches instance2", () => {
     cy.log("Reading JSON files for instance 1 and instance 2...");
 
-    // Read the instance1 JSON file
     cy.readFile("cypress/fixtures/UIComponents/instance1UIComponents.json").then((instance1Data) => {
       cy.log("Instance 1 Data: ", instance1Data);
 
-      // Read the instance2 JSON file
       cy.readFile("cypress/fixtures/UIComponents/instance2UIComponents.json").then((instance2Data) => {
         cy.log("Instance 2 Data: ", instance2Data);
 
-        // Verify the number of dashboards are the same
         expect(instance1Data.length).to.eq(instance2Data.length, "The number of dashboards should be the same in both instances.");
 
-        // Compare dashboards from instance 1 and instance 2
         instance1Data.forEach((dashboard1) => {
           const dashboard2 = instance2Data.find(d => d.dashboard === dashboard1.dashboard);
 
-          // Log if the dashboard is missing in instance2
           if (!dashboard2) {
             cy.log(`Mismatch: Dashboard "${dashboard1.dashboard}" is missing in Instance 2.`);
             throw new Error(`Dashboard "${dashboard1.dashboard}" is missing in Instance 2.`);
           } else {
-            // Log if dashboard exists in both instances, but compare the chart details
             cy.log(`Comparing charts for dashboard: "${dashboard1.dashboard}"`);
 
-            // Verify the number of charts are the same
             expect(dashboard1.details.length).to.eq(dashboard2.details.length, 
               `The number of charts for dashboard "${dashboard1.dashboard}" should be the same in both instances.`);
 
-            // Compare the individual charts
             dashboard1.details.forEach((chart1, index) => {
               const chart2 = dashboard2.details[index];
 
-              // Log if a chart is missing or if there's a mismatch
               if (!chart2) {
                 cy.log(`Mismatch: Chart ${index + 1} (ID: ${chart1.chart_id}) is missing in dashboard "${dashboard1.dashboard}" on Instance 2.`);
                 throw new Error(`Chart ${index + 1} (ID: ${chart1.chart_id}) is missing in dashboard "${dashboard1.dashboard}" on Instance 2.`);
               }
 
-              // Check if chart IDs and titles match
               expect(chart1.chart_id).to.eq(chart2.chart_id, 
                 `Chart ID for "${dashboard1.dashboard}" should match for chart ${index + 1}`);
               expect(chart1.chart_title).to.eq(chart2.chart_title, 

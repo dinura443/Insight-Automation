@@ -85,11 +85,9 @@ export class DashBoard {
   singleExportDashboard(dashboardName: string): void {
     cy.log(`Starting single export for dashboard: ${dashboardName}`);
 
-    // Step 1: Click "Bulk Select" button
     cy.xpath(this.bulkSelectBtn).click({ force: true });
-    cy.wait(1000); // Small delay to ensure checkboxes are visible
+    cy.wait(1000); 
 
-    // Step 2: Get all dashboard names in order from the DOM
     const foundDashboardNames: string[] = [];
 
     cy.get("td a").each(($el) => {
@@ -98,23 +96,19 @@ export class DashBoard {
         foundDashboardNames.push(name);
       }
     }).then(() => {
-      // Log full list for debugging
       cy.log("Found Dashboard List:", JSON.stringify(foundDashboardNames));
 
-      // Step 3: Find the dashboard to export
       const index = foundDashboardNames.indexOf(dashboardName);
       if (index === -1) {
         throw new Error(`Dashboard "${dashboardName}" not found in list.`);
       }
 
-      // Step 4: Check the corresponding checkbox
       const checkboxXPath = `(//input[@id='${index}'])[1]`;
       cy.xpath(checkboxXPath)
         .should("exist")
         .check({ force: true })
         .log(`Checked dashboard at index ${index}: "${foundDashboardNames[index]}"`);
 
-      // Step 5: Click Export button
       cy.xpath(this.exportButton)
         .should("be.visible")
         .click({ force: true });
@@ -168,7 +162,7 @@ export class DashBoard {
           .click({ force: true });
 
         cy.log("✔️ Bulk export completed successfully.");
-        cy.wait(5000); // Wait for the export to complete
+        cy.wait(5000);
       });
   }
 

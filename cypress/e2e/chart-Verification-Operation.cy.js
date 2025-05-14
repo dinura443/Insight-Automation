@@ -13,7 +13,6 @@ describe("Import Single Dashboard", () => {
 
             cy.log(`Found ${zipFiles.length} ZIP file(s) in ${instanceName}. Extracting sequentially...`);
 
-            // Sequential processing using Cypress._.each + cy.wrap
             Cypress._.each(zipFiles, (zipPath) => {
                 const fileName = Cypress._.last(zipPath.split("/"));
 
@@ -22,7 +21,6 @@ describe("Import Single Dashboard", () => {
                 cy.task("unzipFile", { zipPath, extractDir }).then((result) => {
                     cy.log(result.message || `Unzipped ${fileName}`);
 
-                    // Optional: List contents of extractDir to verify
                     cy.task("listDirectoryContents", extractDir).then((contents) => {
                         cy.log(`Contents of ${extractDir}: ${contents.join(", ")}`);
                     });
@@ -42,14 +40,13 @@ describe("Import Single Dashboard", () => {
 
 describe("Bulk Verification Process", () => {
     it("Verifies chart export structure between Instance 1 and Instance 2", () => {
-      const instance1Dir = Cypress.env("FILECOMPONENTS_INSTANCE1"); // e.g., cypress/fixtures/instance1FileComponents
-      const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2"); // e.g., cypress/fixtures/instance2FileComponents
+      const instance1Dir = Cypress.env("FILECOMPONENTS_INSTANCE1"); 
+      const instance2Dir = Cypress.env("FILECOMPONENTS_INSTANCE2"); 
   
       cy.task("verifyChartExportStructure", {
         dir1: instance1Dir,
         dir2: instance2Dir,
       }).then(({ success, message }) => {
-        // Log detailed failure reason to Cypress UI
         if (!success) {
           throw new Error(message || "Folder structure verification failed");
         }
