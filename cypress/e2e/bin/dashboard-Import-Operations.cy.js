@@ -1,5 +1,5 @@
-import { LoginPage } from "../../page-objects-and-services/page-objects/Login";
-import { DashBoard } from "../../page-objects-and-services/page-objects/dashboard-Objects";
+import { LoginPage } from "../../../page-objects-and-services/page-objects/Login";
+import { DashBoard } from "../../../page-objects-and-services/page-objects/dashboard-Objects";
 
 const login = new LoginPage();
 const dashboard = new DashBoard();

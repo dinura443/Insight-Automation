@@ -1,20 +1,22 @@
-import { LoginPage } from "../../page-objects-and-services/page-objects/Login";
-import { DataSet } from "../../page-objects-and-services/page-objects/dataset-Objects";
+import { LoginPage } from "../../../page-objects-and-services/page-objects/Login";
+import { Chart } from "../../../page-objects-and-services/page-objects/chart-Obects";
 
 const loginPage = new LoginPage();
-const dataset = new DataSet();
+const chartPage = new Chart();
 
-let datasetName = [];
+let chartName = [];
 
 before(() => {
-  const envList = Cypress.env("DATASET_NAMES");
+  const envList = Cypress.env("DASHBOARD_NAMES");
   if (!envList || typeof envList !== "string") {
-    throw new Error("No dataset names provided. Set DATASET_NAMES env var.");
+    throw new Error("No dashboard names provided. Set DASHBOARD_NAMES env var.");
   }
-  datasetName = envList.split(",").map((name) => name.trim());
+  chartName = envList.split(",").map((name) => name.trim());
 });
 
-describe("Export datasets from the 1st instance", () => {
+
+
+describe("Export charts from the 1st instance", () => {
   before(() => {
     loginPage.visitInstance1();
     loginPage.enterUsername(Cypress.env("username"));
@@ -22,7 +24,7 @@ describe("Export datasets from the 1st instance", () => {
     loginPage.clickLoginButton();
 
     cy.wait(2000);
-    dataset.visitDatasetPage();
+    chartPage.visitChartPage();
     cy.wait(5000);
 
     cy.getCookie("session").should("exist").then((cookie) => {
@@ -36,22 +38,22 @@ describe("Export datasets from the 1st instance", () => {
       this.sessionCookie = session.value;
     });
 
-    this.datasetNames = Cypress.env("DATASET_NAMES")
+    this.chartNames = Cypress.env("CHART_NAMES")
       .split(",")
       .map((name) => name.trim());
   });
 
-  it("Should export each dataset by name dynamically", function () {
+  it("Should export each chart by name dynamically", function () {
     const supersetUrl = Cypress.env("instance1Login");
 
-    this.datasetNames.forEach((datasetName) => {
+    this.chartNames.forEach((chartName) => {
       const encodedQuery = encodeURIComponent(
         JSON.stringify({
           filters: [
             {
-              col: "table_name",
+              col: "slice_name",
               opr: "eq",
-              value: datasetName,
+              value: chartName,
             },
           ],
         })
@@ -59,7 +61,7 @@ describe("Export datasets from the 1st instance", () => {
 
       cy.request({
         method: "GET",
-        url: `${supersetUrl}/api/v1/dataset/?q=${encodedQuery}`,
+        url: `${supersetUrl}/api/v1/chart/?q=${encodedQuery}`,
         headers: {
           Accept: "application/json",
         },
@@ -69,9 +71,9 @@ describe("Export datasets from the 1st instance", () => {
           return;
         }
 
-        const datasetId = res.body.result[0].id;
-        const idListRison = `!(${datasetId})`;
-        const exportUrl = `${supersetUrl}/api/v1/dataset/export/?q=${encodeURIComponent(idListRison)}`;
+        const chartId = res.body.result[0].id;
+        const idListRison = `!(${chartId})`;
+        const exportUrl = `${supersetUrl}/api/v1/chart/export/?q=${encodeURIComponent(idListRison)}`;
 
         cy.request({
           method: "GET",
@@ -84,7 +86,7 @@ describe("Export datasets from the 1st instance", () => {
           expect(exportRes.status).to.eq(200);
 
           cy.writeFile(
-            `cypress/fixtures/ARCHIVE_INSTANCE1/${datasetName.replace(/\s+/g, "_")}_dataset_export.zip`,
+            `cypress/fixtures/ARCHIVE_INSTANCE1/${chartName.replace(/\s+/g, "_")}_export.zip`,
             exportRes.body,
             { encoding: "binary" }
           );
@@ -94,7 +96,7 @@ describe("Export datasets from the 1st instance", () => {
   });
 });
 
-describe("Backup datasets from Instance 2", () => {
+describe("Backup charts from Instance 2", () => {
   let sessionCookie;
 
   before(() => {
@@ -104,7 +106,7 @@ describe("Backup datasets from Instance 2", () => {
     loginPage.clickLoginButton();
 
     cy.wait(5000);
-    dataset.visitDatasetPage();
+    chartPage.visitChartPage();
     cy.wait(5000);
 
     cy.getCookie("session").should("exist").then((cookie) => {
@@ -118,20 +120,20 @@ describe("Backup datasets from Instance 2", () => {
       this.sessionCookie = session.value;
     });
 
-    this.datasetNames = Cypress.env("DATASET_NAMES")
+    this.chartNames = Cypress.env("CHART_NAMES")
       .split(",")
       .map((name) => name.trim());
   });
 
-  it("Should back up existing datasets in Instance 2 (if any)", function () {
-    this.datasetNames.forEach((datasetName) => {
+  it("Should back up existing charts in Instance 2 (if any)", function () {
+    this.chartNames.forEach((chartName) => {
       const encodedQuery = encodeURIComponent(
         JSON.stringify({
           filters: [
             {
-              col: "table_name",
+              col: "slice_name",
               opr: "eq",
-              value: datasetName,
+              value: chartName,
             },
           ],
         })
@@ -139,7 +141,7 @@ describe("Backup datasets from Instance 2", () => {
 
       cy.request({
         method: "GET",
-        url: `${Cypress.env("instance2Login")}/api/v1/dataset/?q=${encodedQuery}`,
+        url: `${Cypress.env("instance2Login")}/api/v1/chart/?q=${encodedQuery}`,
         headers: {
           Cookie: `session=${this.sessionCookie}`,
           Accept: "application/json",
@@ -150,9 +152,9 @@ describe("Backup datasets from Instance 2", () => {
           return;
         }
 
-        const datasetId = res.body.result[0].id;
-        const risonFilter = `!(${datasetId})`;
-        const exportUrl = `${Cypress.env("instance2Login")}/api/v1/dataset/export/?q=${encodeURIComponent(risonFilter)}`;
+        const chartId = res.body.result[0].id;
+        const risonFilter = `!(${chartId})`;
+        const exportUrl = `${Cypress.env("instance2Login")}/api/v1/chart/export/?q=${encodeURIComponent(risonFilter)}`;
 
         cy.request({
           method: "GET",
@@ -168,14 +170,14 @@ describe("Backup datasets from Instance 2", () => {
           }
 
           cy.writeFile(
-            `cypress/fixtures/backups/pre-import/${datasetName.replace(/\s+/g, "_")}_dataset_backup.zip`,
+            `cypress/fixtures/backups/pre-import/${chartName.replace(/\s+/g, "_")}_backup.zip`,
             exportRes.body,
             { encoding: "binary" }
           );
 
           cy.request({
             method: "DELETE",
-            url: `${Cypress.env("instance2Login")}/api/v1/dataset/${datasetId}`,
+            url: `${Cypress.env("instance2Login")}/api/v1/chart/${chartId}`,
             headers: {
               Cookie: `session=${this.sessionCookie}`,
               Accept: "application/json",
@@ -188,10 +190,10 @@ describe("Backup datasets from Instance 2", () => {
   });
 });
 
-describe("Import datasets to Instance 2 from Instance 1", () => {
+describe("IImportmport charts to Instance 2 from the instance1", () => {
   const archiveDir = Cypress.env("ARCHIVE_INSTANCE1");
 
-  it("Should import all dataset ZIP files from ARCHIVE_INSTANCE1 into Instance 2", function () {
+  it("Should import all ZIP files from ARCHIVE_INSTANCE1 into Instance 2", function () {
     let zipFiles;
 
     cy.task("getFilesInDirectory", archiveDir).then((files) => {
@@ -206,19 +208,13 @@ describe("Import datasets to Instance 2 from Instance 1", () => {
       loginPage.clickLoginButton();
       cy.wait(5000);
 
-      dataset.visitDatasetPage();
+      chartPage.visitChartPage();
       cy.wait(5000);
 
       if (zipFiles && zipFiles.length > 0) {
         zipFiles.forEach((fullFilePath) => {
           const relativePath = fullFilePath.replace(/^.*fixtures[\\\/]/, "");
-          const fileName = relativePath.split("/").pop();
-
-          if (!fileName.includes("_dataset_")) {
-            return;
-          }
-
-          dataset.uploadSpecificFile(relativePath);
+          chartPage.uploadSpecificFile(relativePath);
           cy.wait(3000);
           cy.reload();
         });
@@ -227,7 +223,7 @@ describe("Import datasets to Instance 2 from Instance 1", () => {
   });
 });
 
-describe("Export datasets from the 2nd instance for verification", () => {
+describe("Export The charts from instance2 for verification", () => {
   before(() => {
     loginPage.visitInstance2();
     loginPage.enterUsername(Cypress.env("username"));
@@ -235,7 +231,7 @@ describe("Export datasets from the 2nd instance for verification", () => {
     loginPage.clickLoginButton();
 
     cy.wait(2000);
-    dataset.visitDatasetPage();
+    chartPage.visitChartPage();
     cy.wait(5000);
 
     cy.getCookie("session").should("exist").then((cookie) => {
@@ -249,22 +245,22 @@ describe("Export datasets from the 2nd instance for verification", () => {
       this.sessionCookie = session.value;
     });
 
-    this.datasetNames = Cypress.env("DATASET_NAMES")
+    this.chartNames = Cypress.env("CHART_NAMES")
       .split(",")
       .map((name) => name.trim());
   });
 
-  it("Should export each dataset by name dynamically", function () {
+  it("Should export each chart by name dynamically", function () {
     const supersetUrl = Cypress.env("instance2Login");
 
-    this.datasetNames.forEach((datasetName) => {
+    this.chartNames.forEach((chartName) => {
       const encodedQuery = encodeURIComponent(
         JSON.stringify({
           filters: [
             {
-              col: "table_name",
+              col: "slice_name",
               opr: "eq",
-              value: datasetName,
+              value: chartName,
             },
           ],
         })
@@ -272,7 +268,7 @@ describe("Export datasets from the 2nd instance for verification", () => {
 
       cy.request({
         method: "GET",
-        url: `${supersetUrl}/api/v1/dataset/?q=${encodedQuery}`,
+        url: `${supersetUrl}/api/v1/chart/?q=${encodedQuery}`,
         headers: {
           Accept: "application/json",
         },
@@ -281,10 +277,10 @@ describe("Export datasets from the 2nd instance for verification", () => {
         if (res.status !== 200 || !res.body.result?.length) {
           return;
         }
-
-        const datasetId = res.body.result[0].id;
-        const idListRison = `!(${datasetId})`;
-        const exportUrl = `${supersetUrl}/api/v1/dataset/export/?q=${encodeURIComponent(idListRison)}`;
+//
+        const chartId = res.body.result[0].id;
+        const idListRison = `!(${chartId})`;
+        const exportUrl = `${supersetUrl}/api/v1/chart/export/?q=${encodeURIComponent(idListRison)}`;
 
         cy.request({
           method: "GET",
@@ -297,12 +293,14 @@ describe("Export datasets from the 2nd instance for verification", () => {
           expect(exportRes.status).to.eq(200);
 
           cy.writeFile(
-            `cypress/fixtures/ARCHIVE_INSTANCE2/${datasetName.replace(/\s+/g, "_")}_dataset_export.zip`,
+            `cypress/fixtures/ARCHIVE_INSTANCE2/${chartName.replace(/\s+/g, "_")}_export.zip`,
             exportRes.body,
             { encoding: "binary" }
           );
         });
       });
+      cy.wait(10000)
     });
   });
 });
+

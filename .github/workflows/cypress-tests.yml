@@ -1,3 +1,5 @@
+name: Superset Import Automation
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,16 +9,16 @@ on:
           - dashboard
           - charts
           - datasets
-        description: "Chooose what to import: dashboard, charts or datasets"
+        description: "Choose what to import: dashboard, charts, or datasets"
         required: true
 
       item_names:
         type: string
-        description: "Enter chart/dashboard/dataset name(s) — use comma to separate multiple items"
+        description: "Enter item names (comma-separated if multiple)"
         required: true
 
 jobs:
-  build:
+  import:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,19 +33,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Unset variable
+      - name: Unset Cypress environment variables
         run: npm run unset
 
-      - name: Set env variables from input
+      - name: Set environment variables from inputs
         run: |
           echo "MODE=${{ github.event.inputs.mode }}" >> $GITHUB_ENV
-          
-          # Save item names directly
           echo "ITEM_NAMES=${{ github.event.inputs.item_names }}" >> $GITHUB_ENV
-
-          # Log what we’re doing
-          echo " Running in '$MODE' mode"
-          echo " Items to import: ${ITEM_NAMES}"
+          echo "Selected mode: $MODE"
+          echo "Items to process: $ITEM_NAMES"
 
       - name: Create SSH key
         run: |
@@ -52,48 +50,46 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run Relevant Cypress Tests
+      - name: Run initSessions (required for all modes)
+        run: npx cypress run --spec "cypress/e2e/initSessions.cy.js"
+
+      - name: Run Cypress tests based on mode
         run: |
-          MODE="${{ env.MODE }}"
-          ITEM_NAMES="${{ env.ITEM_NAMES }}"
-
-          IFS=',' read -r -a ITEM_ARRAY <<< "$ITEM_NAMES"
-          echo "📋 You are importing: ${ITEM_ARRAY[@]}"
-
+          echo "Running Cypress tests for mode: $MODE"
           if [ "$MODE" == "dashboard" ]; then
-            npx cypress run --spec "cypress/e2e/dashboard-Import-Operations.cy.js"
-
+            npx cypress run --spec "cypress/e2e/dashboard-import.cy.js"
 
           elif [ "$MODE" == "charts" ]; then
-            npx cypress run --spec "cypress/e2e/chart-Import-Operations.cy.js"
-            npx cypress run --spec "cypress/e2e/chart-Verification-Operation.cy.js"
+            npx cypress run --spec "cypress/e2e/chart-import.cy.js"
+            npx cypress run --spec "cypress/e2e/charts-verification.cy.js"
 
           elif [ "$MODE" == "datasets" ]; then
-            npx cypress run --spec "cypress/e2e/dataset-Import-Operations.cy.js"
-            npx cypress run --spec "cypress/e2e/dataset-Verification-Operation.cy.js"
+            npx cypress run --spec "cypress/e2e/dataset-import.cy.js"
+            npx cypress run --spec "cypress/e2e/dataset-verification.cy.js"
 
           else
-            echo " Unknown mode: $MODE"
+            echo "Unknown mode: $MODE"
             exit 1
           fi
 
-      - name: Get backup filename
-        id: get_name
+      - name: Get latest backup file name
+        id: get_backup
         run: |
           BACKUP_NAME=$(ls cypress/fixtures/backups/pre-import | grep .zip | sort | tail -n 1)
           if [ -z "$BACKUP_NAME" ]; then
-            echo "No backup file found in directory."
+            echo "No backup file found."
             exit 1
           fi
-          echo "Latest backup: $BACKUP_NAME"
           echo "BACKUP_NAME=$BACKUP_NAME" >> $GITHUB_ENV
-      - name: Upload dashboard backup to server
+
+      - name: Upload backup file to remote server
         run: |
-          echo " Uploading ${{ env.BACKUP_NAME }} to server..."
+          echo "Uploading backup: ${{ env.BACKUP_NAME }}"
           scp -o StrictHostKeyChecking=no -i AccumeticKey.pem \
-            cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }} \
+            "cypress/fixtures/backups/pre-import/${{ env.BACKUP_NAME }}" \
             AccumeticUser@34.71.130.138:/home/AccumeticUser/cypress-backups/backups
-      - name: Remove files older than 24 hours on server
+
+      - name: Clean up old backups on server
         run: |
           ssh -o StrictHostKeyChecking=no -i AccumeticKey.pem \
             AccumeticUser@34.71.130.138 \

@@ -1,4 +1,4 @@
-describe("Import Single Dashboard", () => {
+describe("Verify charts", () => {
     const targetDirectory = Cypress.env("FILECOMPONENTS_INSTANCE1");
     const targetDirectory2 = Cypress.env("FILECOMPONENTS_INSTANCE2");
 
